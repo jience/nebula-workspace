@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Monitor, AppWindow, Play, Clock, MoreVertical, Star, X, Cpu, Zap, Globe, Server, Info, History, Power, PlugZap, Search, Signal, Wifi, Laptop, Command } from 'lucide-react';
+import { Monitor, AppWindow, Play, Clock, MoreVertical, Star, X, Cpu, Zap, Globe, Server, Info, History, Power, PlugZap, Search, Signal, Wifi, Laptop, Command, PowerOff, RotateCcw, AlertTriangle, Loader2, CheckCircle2 } from 'lucide-react';
 import { VDIResource, ResourceType, ActivityLogEntry } from '../types';
 import { MOCK_RESOURCES, MOCK_ACTIVITY_LOG } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -17,6 +17,59 @@ interface ModalProps {
   isFavorite: boolean;
   onToggleFavorite: () => void;
 }
+
+// Power Confirmation Modal
+interface ConfirmationModalProps {
+    isOpen: boolean;
+    type: 'shutdown' | 'force_off' | null;
+    resourceName: string;
+    onConfirm: () => void;
+    onCancel: () => void;
+}
+
+const PowerConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, type, resourceName, onConfirm, onCancel }) => {
+    if (!isOpen || !type) return null;
+
+    const isForce = type === 'force_off';
+
+    return (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onCancel}></div>
+            <div className="relative w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl p-6 animate-in zoom-in-95 duration-200">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${isForce ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-500' : 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-500'}`}>
+                    <AlertTriangle size={24} />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                    {isForce ? 'Force Power Off?' : 'Shutdown Virtual Machine?'}
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
+                    {isForce 
+                        ? `Are you sure you want to cut power to "${resourceName}"? Any unsaved data will be lost immediately. This is equivalent to pulling the plug.`
+                        : `Are you sure you want to shut down "${resourceName}"? Please ensure all work is saved.`
+                    }
+                </p>
+                <div className="flex gap-3">
+                    <button 
+                        onClick={onCancel}
+                        className="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        onClick={onConfirm}
+                        className={`flex-1 px-4 py-2 text-white rounded-lg text-sm font-medium transition-colors shadow-lg ${
+                            isForce 
+                            ? 'bg-red-600 hover:bg-red-500 shadow-red-600/20' 
+                            : 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/20'
+                        }`}
+                    >
+                        {isForce ? 'Force Stop' : 'Shutdown'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const ResourceDetailsModal: React.FC<ModalProps> = ({ resource, onClose, onLaunch, isFavorite, onToggleFavorite }) => {
   const { t } = useLanguage();
@@ -137,9 +190,20 @@ const ResourceDetailsModal: React.FC<ModalProps> = ({ resource, onClose, onLaunc
 };
 
 const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }) => {
-  const [selectedResource, setSelectedResource] = useState<VDIResource | null>(null);
+  const [resources, setResources] = useState<VDIResource[]>(MOCK_RESOURCES);
+  const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
   const [showActivityLog, setShowActivityLog] = useState(false);
   
+  // Power Management States
+  const [confirmationState, setConfirmationState] = useState<{ isOpen: boolean, resourceId: string, resourceName: string, type: 'shutdown' | 'force_off' | null }>({
+      isOpen: false, resourceId: '', resourceName: '', type: null
+  });
+  const [processingResources, setProcessingResources] = useState<Set<string>>(new Set());
+  const [toast, setToast] = useState<{ show: boolean, message: string, type: 'success' | 'info' }>({ show: false, message: '', type: 'info' });
+
+  // Get selected resource object from ID
+  const selectedResource = resources.find(r => r.id === selectedResourceId) || null;
+
   // Favorites State with LocalStorage Persistence
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
@@ -156,51 +220,128 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
     localStorage.setItem('nebula_favorites', JSON.stringify(favorites));
   }, [favorites]);
 
+  useEffect(() => {
+    if (toast.show) {
+        const timer = setTimeout(() => {
+            setToast(prev => ({ ...prev, show: false }));
+        }, 3000);
+        return () => clearTimeout(timer);
+    }
+  }, [toast.show]);
+
   const toggleFavorite = (id: string) => {
     setFavorites(prev => 
         prev.includes(id) ? prev.filter(favId => favId !== id) : [...prev, id]
     );
   };
 
+  const showToast = (message: string, type: 'success' | 'info' = 'success') => {
+      setToast({ show: true, message, type });
+  };
+
+  const executePowerAction = (resourceId: string, action: 'start' | 'shutdown' | 'force_off') => {
+    // Add to processing state
+    setProcessingResources(prev => new Set(prev).add(resourceId));
+    
+    // Simulate Network Delay
+    setTimeout(() => {
+        setResources(prev => prev.map(r => {
+            if (r.id !== resourceId) return r;
+            
+            if (action === 'start') return { ...r, status: 'running' };
+            if (action === 'shutdown') return { ...r, status: 'stopped' };
+            if (action === 'force_off') return { ...r, status: 'stopped' };
+            
+            return r;
+        }));
+
+        // Remove from processing state
+        setProcessingResources(prev => {
+            const next = new Set(prev);
+            next.delete(resourceId);
+            return next;
+        });
+
+        // Show Success Toast
+        const actionText = action === 'start' ? 'Started' : action === 'shutdown' ? 'Shutdown' : 'Force Stopped';
+        showToast(`${actionText} successfully`, 'success');
+
+    }, 1500); // 1.5s simulated delay
+  };
+
+  const handlePowerRequest = (e: React.MouseEvent, resource: VDIResource, action: 'start' | 'shutdown' | 'force_off') => {
+    e.stopPropagation();
+    
+    if (action === 'start') {
+        executePowerAction(resource.id, 'start');
+    } else {
+        // Open Confirmation for destructive actions
+        setConfirmationState({
+            isOpen: true,
+            resourceId: resource.id,
+            resourceName: resource.name,
+            type: action
+        });
+    }
+  };
+
+  const handleConfirmPowerAction = () => {
+      if (confirmationState.resourceId && confirmationState.type) {
+          executePowerAction(confirmationState.resourceId, confirmationState.type);
+      }
+      setConfirmationState(prev => ({ ...prev, isOpen: false }));
+  };
+
   // Helper to filter resources based on search query
-  const filterResources = (resources: VDIResource[]) => {
-    if (!searchQuery) return resources;
+  const filterResources = (resList: VDIResource[]) => {
+    if (!searchQuery) return resList;
     const lowerQuery = searchQuery.toLowerCase();
-    return resources.filter(res => 
+    return resList.filter(res => 
         res.name.toLowerCase().includes(lowerQuery) || 
         res.os.toLowerCase().includes(lowerQuery) ||
         res.region.toLowerCase().includes(lowerQuery)
     );
   };
 
-  const desktops = MOCK_RESOURCES.filter(r => r.type === ResourceType.DESKTOP);
-  const apps = MOCK_RESOURCES.filter(r => r.type === ResourceType.APPLICATION);
+  const desktops = resources.filter(r => r.type === ResourceType.DESKTOP);
+  const apps = resources.filter(r => r.type === ResourceType.APPLICATION);
   
   // Filter based on selected category from sidebar
-  let baseResources = MOCK_RESOURCES;
+  let baseResources = resources;
   if (category === 'desktops') baseResources = desktops;
   if (category === 'apps') baseResources = apps;
 
   // Apply search filtering
   const visibleResources = filterResources(baseResources);
-  const runningResources = filterResources(MOCK_RESOURCES.filter(r => r.status === 'running'));
+  const runningResources = filterResources(resources.filter(r => r.status === 'running'));
 
   const ResourceCard: React.FC<{ resource: VDIResource, large?: boolean }> = ({ resource, large = false }) => {
     const isFavorite = favorites.includes(resource.id);
     const isDesktop = resource.type === ResourceType.DESKTOP;
     const isRunning = resource.status === 'running';
+    const isProcessing = processingResources.has(resource.id);
     
     // Simulate connection signal strength based on running status
     const signalStrength = isRunning ? 4 : 0;
     
     return (
         <div 
-          onClick={() => setSelectedResource(resource)}
-          className={`group relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl transition-all duration-300 hover:shadow-xl hover:border-indigo-300 dark:hover:border-indigo-500 overflow-hidden flex flex-col cursor-pointer ${large ? 'col-span-1 md:col-span-2 row-span-2' : ''}`}
+          onClick={() => !isProcessing && setSelectedResourceId(resource.id)}
+          className={`group relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl transition-all duration-300 hover:shadow-xl hover:border-indigo-300 dark:hover:border-indigo-500 overflow-hidden flex flex-col cursor-pointer ${large ? 'col-span-1 md:col-span-2 row-span-2' : ''} ${isProcessing ? 'pointer-events-none opacity-90' : ''}`}
         >
           {/* Header / Preview Area */}
           <div className={`relative w-full ${large ? 'h-56' : 'h-40'} overflow-hidden bg-slate-900 border-b border-slate-200 dark:border-slate-800`}>
             
+            {/* Loading Overlay */}
+            {isProcessing && (
+                <div className="absolute inset-0 z-40 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-2">
+                        <Loader2 size={24} className="text-white animate-spin" />
+                        <span className="text-xs font-medium text-white shadow-sm">Processing...</span>
+                    </div>
+                </div>
+            )}
+
             {/* Desktop: Screen Preview Style */}
             {isDesktop && (
                 <>
@@ -257,18 +398,71 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
                 <Star size={14} fill={isFavorite ? "currentColor" : "none"} />
             </button>
             
-            {/* Hover Overlay with Connect Button */}
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center z-30">
-                 <button 
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onLaunch(resource);
-                    }}
-                    className="flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-full shadow-xl transform scale-90 group-hover:scale-100 transition-all"
-                >
-                    <Play size={16} fill="currentColor" /> 
-                    {t('dash.launch')}
-                </button>
+            {/* Hover Overlay with Operations */}
+            <div className={`absolute inset-0 bg-black/50 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center z-30 gap-3 ${isProcessing ? 'hidden' : ''}`}>
+                 {/* Desktop Operations */}
+                 {isDesktop && (
+                     <>
+                        {resource.status === 'running' && (
+                            <>
+                                <button 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onLaunch(resource);
+                                    }}
+                                    className="flex items-center gap-2 px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-full shadow-xl transform scale-95 group-hover:scale-100 transition-all"
+                                >
+                                    <Play size={16} fill="currentColor" /> 
+                                    {t('dash.launch')}
+                                </button>
+                                <div className="flex gap-2">
+                                    <button 
+                                        onClick={(e) => handlePowerRequest(e, resource, 'shutdown')}
+                                        className="p-2.5 bg-white/10 hover:bg-amber-500/80 text-white rounded-full backdrop-blur-md transition-colors border border-white/20"
+                                        title="Shutdown"
+                                    >
+                                        <Power size={18} />
+                                    </button>
+                                    <button 
+                                        onClick={(e) => handlePowerRequest(e, resource, 'force_off')}
+                                        className="p-2.5 bg-white/10 hover:bg-red-500/80 text-white rounded-full backdrop-blur-md transition-colors border border-white/20"
+                                        title="Force Power Off"
+                                    >
+                                        <PlugZap size={18} />
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                        {resource.status === 'stopped' && (
+                             <button 
+                                onClick={(e) => handlePowerRequest(e, resource, 'start')}
+                                className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-full shadow-xl transform scale-95 group-hover:scale-100 transition-all"
+                            >
+                                <Power size={18} /> 
+                                Power On
+                            </button>
+                        )}
+                        {resource.status === 'maintenance' && (
+                            <span className="text-white/80 font-medium px-4 py-1.5 bg-white/10 rounded-full backdrop-blur">
+                                Maintenance
+                            </span>
+                        )}
+                     </>
+                 )}
+
+                 {/* App Operations (Usually just Launch) */}
+                 {!isDesktop && (
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onLaunch(resource);
+                        }}
+                        className="flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-full shadow-xl transform scale-90 group-hover:scale-100 transition-all"
+                    >
+                        <Play size={16} fill="currentColor" /> 
+                        {t('dash.launch')}
+                    </button>
+                 )}
             </div>
           </div>
     
@@ -314,11 +508,28 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
 
   return (
     <div className="relative space-y-8 animate-fade-in pb-20">
+      {/* Toast Notification */}
+      {toast.show && (
+          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-2 px-4 py-2 bg-slate-900/90 dark:bg-slate-800/90 text-white rounded-full shadow-2xl backdrop-blur animate-in fade-in slide-in-from-top-4">
+              <CheckCircle2 size={16} className="text-emerald-500" />
+              <span className="text-xs font-medium">{toast.message}</span>
+          </div>
+      )}
+
+      {/* Confirmation Modal */}
+      <PowerConfirmationModal 
+          isOpen={confirmationState.isOpen}
+          type={confirmationState.type}
+          resourceName={confirmationState.resourceName}
+          onConfirm={handleConfirmPowerAction}
+          onCancel={() => setConfirmationState(prev => ({ ...prev, isOpen: false }))}
+      />
+
       {/* Modal Render */}
       {selectedResource && (
           <ResourceDetailsModal 
             resource={selectedResource} 
-            onClose={() => setSelectedResource(null)}
+            onClose={() => setSelectedResourceId(null)}
             onLaunch={onLaunch}
             isFavorite={favorites.includes(selectedResource.id)}
             onToggleFavorite={() => toggleFavorite(selectedResource.id)}
