@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Globe, Monitor, Smartphone, Laptop, Bell, Moon, Sun, Check, Info, Speaker, Mic, Camera, Keyboard, Cpu, Zap, Wifi } from 'lucide-react';
+import { X, Globe, Monitor, Laptop, Moon, Sun, Check, Info, Speaker, Cpu, Zap } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme, Theme } from '../contexts/ThemeContext';
 

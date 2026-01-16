@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, User as UserIcon, Mail, MapPin, Briefcase, Calendar, Shield, Edit2, Check, Camera, LogOut } from 'lucide-react';
+import { X, Mail, MapPin, Briefcase, Calendar, Edit2, Check, Camera, LogOut } from 'lucide-react';
 import { User } from '../types';
 import { useLanguage } from '../contexts/LanguageContext';
 
