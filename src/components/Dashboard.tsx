@@ -1,424 +1,448 @@
 import React, { useState, useEffect } from 'react';
-import { Monitor, AppWindow, Play, Clock, MoreVertical, Star, X, Cpu, Zap, Globe, Server, Info, History, Power, PlugZap, Search } from 'lucide-react';
+import { Monitor, AppWindow, Play, Clock, MoreVertical, Star, X, Cpu, Zap, Globe, Server, Info, History, Power, PlugZap, Search, Signal, Wifi, Laptop, Command } from 'lucide-react';
 import { VDIResource, ResourceType, ActivityLogEntry } from '../types';
 import { MOCK_RESOURCES, MOCK_ACTIVITY_LOG } from '../constants';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface DashboardProps {
-    onLaunch: (resource: VDIResource) => void;
-    category: 'all' | 'desktops' | 'apps';
-    searchQuery: string;
+  onLaunch: (resource: VDIResource) => void;
+  category: 'all' | 'desktops' | 'apps';
+  searchQuery: string;
 }
 
 interface ModalProps {
-    resource: VDIResource;
-    onClose: () => void;
-    onLaunch: (resource: VDIResource) => void;
-    isFavorite: boolean;
-    onToggleFavorite: () => void;
+  resource: VDIResource;
+  onClose: () => void;
+  onLaunch: (resource: VDIResource) => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
 }
 
 const ResourceDetailsModal: React.FC<ModalProps> = ({ resource, onClose, onLaunch, isFavorite, onToggleFavorite }) => {
-    const { t } = useLanguage();
-    if (!resource) return null;
+  const { t } = useLanguage();
+  if (!resource) return null;
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose}></div>
-            <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose}></div>
+      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        
+        {/* Header Image Area */}
+        <div className="h-32 bg-slate-100 dark:bg-slate-800 relative">
+             <div 
+                className="absolute inset-0 bg-cover bg-center opacity-50"
+                style={{ backgroundImage: `url('https://picsum.photos/seed/${resource.id}/600/400')` }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent"></div>
+            
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+                <button 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleFavorite();
+                    }}
+                    className={`p-2 rounded-full transition-all backdrop-blur-md border border-slate-200 dark:border-white/10 ${
+                        isFavorite 
+                        ? 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/30' 
+                        : 'bg-white/60 dark:bg-black/40 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800'
+                    }`}
+                >
+                    <Star size={18} fill={isFavorite ? "currentColor" : "none"} className={isFavorite ? "scale-110" : ""} />
+                </button>
+                <button 
+                    onClick={onClose}
+                    className="p-2 bg-white/60 dark:bg-black/40 hover:bg-white dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-full transition-colors backdrop-blur-md border border-slate-200 dark:border-white/10"
+                >
+                    <X size={18} />
+                </button>
+            </div>
 
-                {/* Header Image Area */}
-                <div className="h-32 bg-slate-100 dark:bg-slate-800 relative">
-                    <div
-                        className="absolute inset-0 bg-cover bg-center opacity-50"
-                        style={{ backgroundImage: `url('https://picsum.photos/seed/${resource.id}/600/400')` }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent"></div>
-
-                    <div className="absolute top-4 right-4 flex items-center gap-2">
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onToggleFavorite();
-                            }}
-                            className={`p-2 rounded-full transition-all backdrop-blur-md border border-slate-200 dark:border-white/10 ${
-                                isFavorite
-                                    ? 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/30'
-                                    : 'bg-white/60 dark:bg-black/40 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800'
-                            }`}
-                        >
-                            <Star size={18} fill={isFavorite ? "currentColor" : "none"} className={isFavorite ? "scale-110" : ""} />
-                        </button>
-                        <button
-                            onClick={onClose}
-                            className="p-2 bg-white/60 dark:bg-black/40 hover:bg-white dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-full transition-colors backdrop-blur-md border border-slate-200 dark:border-white/10"
-                        >
-                            <X size={18} />
-                        </button>
-                    </div>
-
-                    <div className="absolute bottom-4 left-6">
-                        <div className="flex items-center gap-2 mb-1">
-                            {resource.type === ResourceType.DESKTOP ? <Monitor size={16} className="text-indigo-600 dark:text-indigo-400"/> : <AppWindow size={16} className="text-pink-600 dark:text-pink-400"/>}
-                            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">{resource.type}</span>
-                        </div>
-                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{resource.name}</h2>
-                    </div>
-                </div>
-
-                {/* Content Body */}
-                <div className="p-6 space-y-6">
-
-                    {/* Status Section */}
-                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700/50">
-                        <span className="text-sm text-slate-500 dark:text-slate-400">{t('modal.status')}</span>
-                        <div className="flex items-center gap-2">
-                            <div className={`w-2.5 h-2.5 rounded-full ${resource.status === 'running' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400 dark:bg-slate-500'}`}></div>
-                            <span className={`text-sm font-medium ${resource.status === 'running' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'} uppercase`}>
-                        {resource.status === 'running' ? t('dash.running') : t('dash.stopped')}
-                     </span>
-                        </div>
-                    </div>
-
-                    {/* Specs Grid */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="p-3 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-slate-200 dark:border-slate-800">
-                            <div className="flex items-center gap-2 mb-1 text-slate-500">
-                                <Cpu size={14} />
-                                <span className="text-xs uppercase font-bold tracking-wider">vCPU</span>
-                            </div>
-                            <div className="text-lg font-semibold text-slate-900 dark:text-white">{resource.cpu} Cores</div>
-                        </div>
-                        <div className="p-3 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-slate-200 dark:border-slate-800">
-                            <div className="flex items-center gap-2 mb-1 text-slate-500">
-                                <Zap size={14} />
-                                <span className="text-xs uppercase font-bold tracking-wider">Memory</span>
-                            </div>
-                            <div className="text-lg font-semibold text-slate-900 dark:text-white">{resource.ram} GB</div>
-                        </div>
-                        <div className="p-3 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-slate-200 dark:border-slate-800">
-                            <div className="flex items-center gap-2 mb-1 text-slate-500">
-                                <Server size={14} />
-                                <span className="text-xs uppercase font-bold tracking-wider">OS</span>
-                            </div>
-                            <div className="text-lg font-semibold text-slate-900 dark:text-white truncate" title={resource.os}>{resource.os}</div>
-                        </div>
-                        <div className="p-3 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-slate-200 dark:border-slate-800">
-                            <div className="flex items-center gap-2 mb-1 text-slate-500">
-                                <Globe size={14} />
-                                <span className="text-xs uppercase font-bold tracking-wider">{t('dash.region')}</span>
-                            </div>
-                            <div className="text-lg font-semibold text-slate-900 dark:text-white truncate" title={resource.region}>{resource.region.split(' ')[0]}</div>
-                        </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="pt-2 flex gap-3">
-                        <button
-                            onClick={onClose}
-                            className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-lg transition-colors border border-slate-200 dark:border-slate-700"
-                        >
-                            {t('modal.close')}
-                        </button>
-                        <button
-                            onClick={() => {
-                                onLaunch(resource);
-                                onClose();
-                            }}
-                            className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg shadow-lg shadow-indigo-600/20 transition-all active:scale-95 flex items-center justify-center gap-2"
-                        >
-                            <Play size={16} fill="currentColor" /> {t('modal.launch')}
-                        </button>
-                    </div>
-                </div>
+            <div className="absolute bottom-4 left-6">
+                 <div className="flex items-center gap-2 mb-1">
+                    {resource.type === ResourceType.DESKTOP ? <Monitor size={16} className="text-indigo-600 dark:text-indigo-400"/> : <AppWindow size={16} className="text-pink-600 dark:text-pink-400"/>}
+                    <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">{resource.type}</span>
+                 </div>
+                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{resource.name}</h2>
             </div>
         </div>
-    );
+
+        {/* Content Body */}
+        <div className="p-6 space-y-6">
+            
+            {/* Status Section */}
+            <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700/50">
+                <span className="text-sm text-slate-500 dark:text-slate-400">{t('modal.status')}</span>
+                <div className="flex items-center gap-2">
+                     <div className={`w-2.5 h-2.5 rounded-full ${resource.status === 'running' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400 dark:bg-slate-500'}`}></div>
+                     <span className={`text-sm font-medium ${resource.status === 'running' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'} uppercase`}>
+                        {resource.status === 'running' ? t('dash.running') : t('dash.stopped')}
+                     </span>
+                </div>
+            </div>
+
+            {/* Specs Grid */}
+            <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-slate-200 dark:border-slate-800">
+                    <div className="flex items-center gap-2 mb-1 text-slate-500">
+                        <Cpu size={14} />
+                        <span className="text-xs uppercase font-bold tracking-wider">vCPU</span>
+                    </div>
+                    <div className="text-lg font-semibold text-slate-900 dark:text-white">{resource.cpu} Cores</div>
+                </div>
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-slate-200 dark:border-slate-800">
+                    <div className="flex items-center gap-2 mb-1 text-slate-500">
+                        <Zap size={14} />
+                        <span className="text-xs uppercase font-bold tracking-wider">Memory</span>
+                    </div>
+                    <div className="text-lg font-semibold text-slate-900 dark:text-white">{resource.ram} GB</div>
+                </div>
+                <div className="p-3 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-slate-200 dark:border-slate-800">
+                    <div className="flex items-center gap-2 mb-1 text-slate-500">
+                        <Server size={14} />
+                        <span className="text-xs uppercase font-bold tracking-wider">OS</span>
+                    </div>
+                    <div className="text-lg font-semibold text-slate-900 dark:text-white truncate" title={resource.os}>{resource.os}</div>
+                </div>
+                 <div className="p-3 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-slate-200 dark:border-slate-800">
+                    <div className="flex items-center gap-2 mb-1 text-slate-500">
+                        <Globe size={14} />
+                        <span className="text-xs uppercase font-bold tracking-wider">{t('dash.region')}</span>
+                    </div>
+                    <div className="text-lg font-semibold text-slate-900 dark:text-white truncate" title={resource.region}>{resource.region.split(' ')[0]}</div>
+                </div>
+            </div>
+
+            {/* Actions */}
+            <div className="pt-2 flex gap-3">
+                 <button 
+                    onClick={onClose}
+                    className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-lg transition-colors border border-slate-200 dark:border-slate-700"
+                >
+                    {t('modal.close')}
+                </button>
+                 <button 
+                    onClick={() => {
+                        onLaunch(resource);
+                        onClose();
+                    }}
+                    className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg shadow-lg shadow-indigo-600/20 transition-all active:scale-95 flex items-center justify-center gap-2"
+                >
+                    <Play size={16} fill="currentColor" /> {t('modal.launch')}
+                </button>
+            </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }) => {
-    const [selectedResource, setSelectedResource] = useState<VDIResource | null>(null);
-    const [showActivityLog, setShowActivityLog] = useState(false);
+  const [selectedResource, setSelectedResource] = useState<VDIResource | null>(null);
+  const [showActivityLog, setShowActivityLog] = useState(false);
+  
+  // Favorites State with LocalStorage Persistence
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    try {
+        const saved = localStorage.getItem('nebula_favorites');
+        return saved ? JSON.parse(saved) : ['res-1'];
+    } catch (e) {
+        return ['res-1'];
+    }
+  });
 
-    // Favorites State with LocalStorage Persistence
-    const [favorites, setFavorites] = useState<string[]>(() => {
-        try {
-            const saved = localStorage.getItem('nebula_favorites');
-            return saved ? JSON.parse(saved) : ['res-1'];
-        } catch (e) {
-            return ['res-1'];
-        }
-    });
+  const { t } = useLanguage();
 
-    const { t } = useLanguage();
+  useEffect(() => {
+    localStorage.setItem('nebula_favorites', JSON.stringify(favorites));
+  }, [favorites]);
 
-    useEffect(() => {
-        localStorage.setItem('nebula_favorites', JSON.stringify(favorites));
-    }, [favorites]);
+  const toggleFavorite = (id: string) => {
+    setFavorites(prev => 
+        prev.includes(id) ? prev.filter(favId => favId !== id) : [...prev, id]
+    );
+  };
 
-    const toggleFavorite = (id: string) => {
-        setFavorites(prev =>
-            prev.includes(id) ? prev.filter(favId => favId !== id) : [...prev, id]
-        );
-    };
+  // Helper to filter resources based on search query
+  const filterResources = (resources: VDIResource[]) => {
+    if (!searchQuery) return resources;
+    const lowerQuery = searchQuery.toLowerCase();
+    return resources.filter(res => 
+        res.name.toLowerCase().includes(lowerQuery) || 
+        res.os.toLowerCase().includes(lowerQuery) ||
+        res.region.toLowerCase().includes(lowerQuery)
+    );
+  };
 
-    // Helper to filter resources based on search query
-    const filterResources = (resources: VDIResource[]) => {
-        if (!searchQuery) return resources;
-        const lowerQuery = searchQuery.toLowerCase();
-        return resources.filter(res =>
-            res.name.toLowerCase().includes(lowerQuery) ||
-            res.os.toLowerCase().includes(lowerQuery) ||
-            res.region.toLowerCase().includes(lowerQuery)
-        );
-    };
+  const desktops = MOCK_RESOURCES.filter(r => r.type === ResourceType.DESKTOP);
+  const apps = MOCK_RESOURCES.filter(r => r.type === ResourceType.APPLICATION);
+  
+  // Filter based on selected category from sidebar
+  let baseResources = MOCK_RESOURCES;
+  if (category === 'desktops') baseResources = desktops;
+  if (category === 'apps') baseResources = apps;
 
-    const desktops = MOCK_RESOURCES.filter(r => r.type === ResourceType.DESKTOP);
-    const apps = MOCK_RESOURCES.filter(r => r.type === ResourceType.APPLICATION);
+  // Apply search filtering
+  const visibleResources = filterResources(baseResources);
+  const runningResources = filterResources(MOCK_RESOURCES.filter(r => r.status === 'running'));
 
-    // Filter based on selected category from sidebar
-    let baseResources = MOCK_RESOURCES;
-    if (category === 'desktops') baseResources = desktops;
-    if (category === 'apps') baseResources = apps;
-
-    // Apply search filtering
-    const visibleResources = filterResources(baseResources);
-    const runningResources = filterResources(MOCK_RESOURCES.filter(r => r.status === 'running'));
-
-    const ResourceCard: React.FC<{ resource: VDIResource, large?: boolean }> = ({ resource, large = false }) => {
-        const isFavorite = favorites.includes(resource.id);
-
-        return (
-            <div
-                onClick={() => setSelectedResource(resource)}
-                className={`group relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-indigo-300/50 dark:hover:border-indigo-500/50 overflow-hidden flex flex-col cursor-pointer ${large ? 'col-span-1 md:col-span-2 row-span-2' : ''}`}
-            >
-                {/* Card Header / Image Area */}
-                <div className={`relative w-full ${large ? 'h-56' : 'h-36'} overflow-hidden bg-slate-100 dark:bg-slate-900`}>
-                    {/* Background Image with Zoom Effect */}
-                    <div
-                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+  const ResourceCard: React.FC<{ resource: VDIResource, large?: boolean }> = ({ resource, large = false }) => {
+    const isFavorite = favorites.includes(resource.id);
+    const isDesktop = resource.type === ResourceType.DESKTOP;
+    const isRunning = resource.status === 'running';
+    
+    // Simulate connection signal strength based on running status
+    const signalStrength = isRunning ? 4 : 0;
+    
+    return (
+        <div 
+          onClick={() => setSelectedResource(resource)}
+          className={`group relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl transition-all duration-300 hover:shadow-xl hover:border-indigo-300 dark:hover:border-indigo-500 overflow-hidden flex flex-col cursor-pointer ${large ? 'col-span-1 md:col-span-2 row-span-2' : ''}`}
+        >
+          {/* Header / Preview Area */}
+          <div className={`relative w-full ${large ? 'h-56' : 'h-40'} overflow-hidden bg-slate-900 border-b border-slate-200 dark:border-slate-800`}>
+            
+            {/* Desktop: Screen Preview Style */}
+            {isDesktop && (
+                <>
+                    <div 
+                        className="absolute inset-x-2 top-2 bottom-0 bg-cover bg-center rounded-t-lg shadow-2xl transition-transform duration-500 group-hover:scale-[1.02] origin-bottom"
                         style={{ backgroundImage: `url('https://picsum.photos/seed/${resource.id}/600/400')` }}
                     />
+                     {/* Simulated Taskbar inside preview */}
+                     <div className="absolute inset-x-2 bottom-0 h-3 bg-slate-900/80 backdrop-blur-sm rounded-b-none z-10 flex items-center justify-center gap-0.5 opacity-80">
+                         <div className="w-1 h-1 bg-white/50 rounded-full"></div>
+                         <div className="w-1 h-1 bg-white/50 rounded-full"></div>
+                     </div>
+                </>
+            )}
 
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
-
-                    {/* Status Indicator (Top Right) */}
-                    <div className="absolute top-3 right-3 flex gap-2 z-10">
-                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm backdrop-blur-md border ${
-                    resource.status === 'running'
-                        ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-100'
-                        : resource.status === 'maintenance'
-                            ? 'bg-amber-500/20 border-amber-500/30 text-amber-100'
-                            : 'bg-slate-500/30 border-slate-500/30 text-slate-200'
+            {/* App: Icon Tile Style */}
+            {!isDesktop && (
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 dark:from-indigo-900/20 dark:to-purple-900/20 flex items-center justify-center group-hover:bg-indigo-50 dark:group-hover:bg-slate-800 transition-colors">
+                     <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, gray 1px, transparent 0)', backgroundSize: '20px 20px' }}></div>
+                     <div className="w-16 h-16 bg-white dark:bg-slate-700 rounded-2xl shadow-lg flex items-center justify-center z-10 group-hover:scale-110 transition-transform duration-300">
+                        <Command size={32} className="text-pink-500" />
+                     </div>
+                </div>
+            )}
+            
+            {/* Status Badge (Top Right) */}
+            <div className="absolute top-3 right-3 z-20">
+                <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border shadow-sm ${
+                     isRunning 
+                     ? 'bg-emerald-500/90 border-emerald-400 text-white' 
+                     : resource.status === 'maintenance'
+                         ? 'bg-amber-500/90 border-amber-400 text-white'
+                         : 'bg-slate-600/90 border-slate-500 text-slate-100'
                 }`}>
-                     {resource.status === 'running' && t('dash.running')}
+                    <div className={`w-1.5 h-1.5 rounded-full bg-current ${isRunning ? 'animate-pulse' : ''}`}></div>
+                    {resource.status === 'running' && t('dash.running')}
                     {resource.status === 'stopped' && t('dash.stopped')}
                     {resource.status === 'maintenance' && t('dash.maintenance')}
-                </span>
-                    </div>
-
-                    {/* Type Icon (Bottom Left on Image) */}
-                    <div className="absolute bottom-3 left-3">
-                        <div className="p-2 rounded-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur shadow-lg border border-white/20 dark:border-slate-700 text-indigo-600 dark:text-indigo-400">
-                            {resource.type === ResourceType.DESKTOP ? <Monitor size={18} /> : <AppWindow size={18} />}
-                        </div>
-                    </div>
-
-                    {/* Favorite Button (Top Left) */}
-                    <button
-                        className={`absolute top-3 left-3 p-2 rounded-full backdrop-blur-md transition-all duration-200 z-20 ${
-                            isFavorite
-                                ? 'bg-yellow-400/20 text-yellow-300 hover:bg-yellow-400/30'
-                                : 'bg-black/20 text-white/50 hover:bg-black/40 hover:text-white opacity-0 group-hover:opacity-100'
-                        }`}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            toggleFavorite(resource.id);
-                        }}
-                    >
-                        <Star size={16} fill={isFavorite ? "currentColor" : "none"} className={isFavorite ? "scale-110" : ""} />
-                    </button>
                 </div>
+            </div>
 
-                {/* Card Content */}
-                <div className="p-5 flex-1 flex flex-col justify-between">
-                    <div>
-                        <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 truncate mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                            {resource.name}
-                        </h3>
-                        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-4">
-                            <Server size={12} />
-                            <span className="truncate">{resource.os}</span>
-                        </div>
-
-                        {/* Specs Grid (Mini) */}
-                        <div className="grid grid-cols-2 gap-2 mb-4">
-                            <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
-                                <Cpu size={12} className="text-slate-400" />
-                                <span className="text-xs font-medium text-slate-600 dark:text-slate-300">{resource.cpu} vCPU</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
-                                <Zap size={12} className="text-slate-400" />
-                                <span className="text-xs font-medium text-slate-600 dark:text-slate-300">{resource.ram} GB</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-700/50">
-                        <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                            <Globe size={12} />
-                            <span className="truncate max-w-[80px]">{resource.region.split(' ')[0]}</span>
-                        </div>
-
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onLaunch(resource);
-                            }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-lg transition-colors group-hover:shadow-sm"
-                        >
-                            <Play size={12} fill="currentColor" />
-                            {t('dash.launch')}
-                        </button>
+            {/* Favorite Button (Top Left) */}
+             <button 
+                className={`absolute top-3 left-3 p-1.5 rounded-lg backdrop-blur-md transition-all duration-200 z-20 border ${
+                    isFavorite 
+                    ? 'bg-yellow-400/90 border-yellow-400 text-yellow-900 shadow-sm' 
+                    : 'bg-slate-900/40 border-white/10 text-white/70 hover:bg-slate-900/60 hover:text-white opacity-0 group-hover:opacity-100'
+                }`}
+                onClick={(e) => { 
+                    e.stopPropagation(); 
+                    toggleFavorite(resource.id);
+                }}
+            >
+                <Star size={14} fill={isFavorite ? "currentColor" : "none"} />
+            </button>
+            
+            {/* Hover Overlay with Connect Button */}
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center z-30">
+                 <button 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onLaunch(resource);
+                    }}
+                    className="flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-full shadow-xl transform scale-90 group-hover:scale-100 transition-all"
+                >
+                    <Play size={16} fill="currentColor" /> 
+                    {t('dash.launch')}
+                </button>
+            </div>
+          </div>
+    
+          {/* Card Body */}
+          <div className="p-4 flex-1 flex flex-col">
+            <div className="flex items-start justify-between mb-2">
+                <div className="overflow-hidden">
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {resource.name}
+                    </h3>
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                         {isDesktop ? <Laptop size={12} /> : <AppWindow size={12} />}
+                         <span className="truncate">{resource.os}</span>
                     </div>
                 </div>
             </div>
-        );
-    };
 
-    return (
-        <div className="relative space-y-8 animate-fade-in pb-20">
-            {/* Modal Render */}
-            {selectedResource && (
-                <ResourceDetailsModal
-                    resource={selectedResource}
-                    onClose={() => setSelectedResource(null)}
-                    onLaunch={onLaunch}
-                    isFavorite={favorites.includes(selectedResource.id)}
-                    onToggleFavorite={() => toggleFavorite(selectedResource.id)}
-                />
-            )}
-
-            {/* Activity Log Sidebar */}
-            <div
-                className={`fixed top-14 right-0 bottom-8 w-80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-l border-slate-200 dark:border-slate-700 shadow-2xl z-30 transform transition-transform duration-300 ease-in-out ${showActivityLog ? 'translate-x-0' : 'translate-x-full'}`}
-            >
-                <div className="h-full flex flex-col">
-                    <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
-                        <h3 className="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                            <History size={16} className="text-indigo-600 dark:text-indigo-400"/> {t('dash.recent_activity')}
-                        </h3>
-                        <button onClick={() => setShowActivityLog(false)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white">
-                            <X size={16} />
-                        </button>
+            <div className="mt-auto pt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-700/50">
+                {/* Tech Specs */}
+                <div className="flex gap-2">
+                    <div className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700/50 text-[10px] font-mono font-medium text-slate-600 dark:text-slate-300 flex items-center gap-1" title="CPU">
+                        <Cpu size={10} /> {resource.cpu}
                     </div>
-                    <div className="flex-1 overflow-y-auto">
-                        {MOCK_ACTIVITY_LOG.map((log) => (
-                            <div key={log.id} className="p-4 border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                <div className="flex items-start gap-3">
-                                    <div className="p-2 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 mt-1">
-                                        {log.type === ResourceType.DESKTOP ? <Monitor size={14} /> : <AppWindow size={14} />}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className="text-sm font-medium text-slate-800 dark:text-white truncate">{log.resourceName}</h4>
-                                        <div className="flex items-center gap-1.5 mt-1">
-                                            {log.action === 'LAUNCHED' && <Play size={10} className="text-emerald-500 dark:text-emerald-400" />}
-                                            {log.action === 'STOPPED' && <Power size={10} className="text-slate-400" />}
-                                            {log.action === 'DISCONNECTED' && <PlugZap size={10} className="text-amber-500 dark:text-amber-400" />}
-                                            <span className={`text-xs font-medium uppercase ${
-                                                log.action === 'LAUNCHED' ? 'text-emerald-600 dark:text-emerald-400' :
-                                                    log.action === 'DISCONNECTED' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'
-                                            }`}>
+                    <div className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700/50 text-[10px] font-mono font-medium text-slate-600 dark:text-slate-300 flex items-center gap-1" title="Memory">
+                        <Zap size={10} /> {resource.ram}G
+                    </div>
+                </div>
+                
+                {/* Connection Quality Indicator */}
+                <div className="flex items-center gap-1 text-slate-400" title="Connection Quality">
+                    {signalStrength > 0 ? (
+                        <Wifi size={14} className="text-emerald-500" />
+                    ) : (
+                        <Wifi size={14} className="text-slate-300 dark:text-slate-600" />
+                    )}
+                    <span className="text-[10px] font-mono">{resource.region.includes('US') ? '24ms' : '110ms'}</span>
+                </div>
+            </div>
+          </div>
+        </div>
+      );
+  };
+
+  return (
+    <div className="relative space-y-8 animate-fade-in pb-20">
+      {/* Modal Render */}
+      {selectedResource && (
+          <ResourceDetailsModal 
+            resource={selectedResource} 
+            onClose={() => setSelectedResource(null)}
+            onLaunch={onLaunch}
+            isFavorite={favorites.includes(selectedResource.id)}
+            onToggleFavorite={() => toggleFavorite(selectedResource.id)}
+          />
+      )}
+      
+      {/* Activity Log Sidebar */}
+      <div 
+        className={`fixed top-14 right-0 bottom-8 w-80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-l border-slate-200 dark:border-slate-700 shadow-2xl z-30 transform transition-transform duration-300 ease-in-out ${showActivityLog ? 'translate-x-0' : 'translate-x-full'}`}
+      >
+        <div className="h-full flex flex-col">
+            <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+                <h3 className="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                    <History size={16} className="text-indigo-600 dark:text-indigo-400"/> {t('dash.recent_activity')}
+                </h3>
+                <button onClick={() => setShowActivityLog(false)} className="text-slate-400 hover:text-slate-800 dark:hover:text-white">
+                    <X size={16} />
+                </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+                {MOCK_ACTIVITY_LOG.map((log) => (
+                    <div key={log.id} className="p-4 border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 mt-1">
+                                {log.type === ResourceType.DESKTOP ? <Monitor size={14} /> : <AppWindow size={14} />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h4 className="text-sm font-medium text-slate-800 dark:text-white truncate">{log.resourceName}</h4>
+                                <div className="flex items-center gap-1.5 mt-1">
+                                    {log.action === 'LAUNCHED' && <Play size={10} className="text-emerald-500 dark:text-emerald-400" />}
+                                    {log.action === 'STOPPED' && <Power size={10} className="text-slate-400" />}
+                                    {log.action === 'DISCONNECTED' && <PlugZap size={10} className="text-amber-500 dark:text-amber-400" />}
+                                    <span className={`text-xs font-medium uppercase ${
+                                        log.action === 'LAUNCHED' ? 'text-emerald-600 dark:text-emerald-400' :
+                                        log.action === 'DISCONNECTED' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-500 dark:text-slate-400'
+                                    }`}>
                                         {log.action}
                                     </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="mt-2 text-right">
-                                    <span className="text-[10px] text-slate-500">{log.timestamp}</span>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                    <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                        <button className="w-full py-2 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded border border-slate-200 dark:border-slate-700 transition-colors">
-                            {t('dash.view_full')}
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Welcome / Quick Access Section - Only show on 'all' view */}
-            {category === 'all' && (
-                <div className="mb-8">
-                    <h2 className="text-lg font-medium text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-                        <Clock size={18} className="text-indigo-600 dark:text-indigo-400" /> {t('dash.recent')}
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {runningResources.length > 0 ? (
-                            runningResources.map(res => <ResourceCard key={res.id} resource={res} />)
-                        ) : (
-                            <div className="col-span-full h-32 bg-white dark:bg-slate-800/30 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-500 text-sm">
-                                {searchQuery ? t('dash.no_results') : t('dash.no_active')}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {/* Main Library Grid */}
-            <div>
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-medium text-slate-800 dark:text-white flex items-center gap-2">
-                        {category === 'all' && t('dash.all')}
-                        {category === 'desktops' && t('dash.desktops')}
-                        {category === 'apps' && t('dash.apps')}
-                        <span className="text-xs font-normal text-slate-500 ml-2 bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded-full">
-                    {visibleResources.length}
-                </span>
-                    </h2>
-
-                    {/* Filter/Sort Controls */}
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => setShowActivityLog(!showActivityLog)}
-                            className={`flex items-center gap-1 px-3 py-1 text-xs rounded-md border transition-colors ${
-                                showActivityLog
-                                    ? 'bg-indigo-600 border-indigo-500 text-white'
-                                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-                            }`}
-                        >
-                            <History size={14} /> {t('dash.history')}
-                        </button>
-                        <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
-                        <select className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded-md px-2 py-1 outline-none focus:border-indigo-500">
-                            <option>{t('dash.sort.name')}</option>
-                            <option>{t('dash.sort.status')}</option>
-                            <option>{t('dash.sort.usage')}</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {visibleResources.length > 0 ? (
-                        visibleResources.map(resource => (
-                            <ResourceCard key={resource.id} resource={resource} />
-                        ))
-                    ) : (
-                        <div className="col-span-full py-12 text-center">
-                            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400 dark:text-slate-500">
-                                <Search size={32} />
-                            </div>
-                            <h3 className="text-slate-700 dark:text-white font-medium">{t('dash.empty_search')}</h3>
-                            <p className="text-slate-500 text-sm mt-1">{t('dash.empty_hint')}</p>
                         </div>
-                    )}
-                </div>
+                        <div className="mt-2 text-right">
+                             <span className="text-[10px] text-slate-500">{log.timestamp}</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                <button className="w-full py-2 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded border border-slate-200 dark:border-slate-700 transition-colors">
+                    {t('dash.view_full')}
+                </button>
             </div>
         </div>
-    );
+      </div>
+
+      {/* Welcome / Quick Access Section - Only show on 'all' view */}
+      {category === 'all' && (
+          <div className="mb-8">
+            <h2 className="text-lg font-medium text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                <Clock size={18} className="text-indigo-600 dark:text-indigo-400" /> {t('dash.recent')}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {runningResources.length > 0 ? (
+                    runningResources.map(res => <ResourceCard key={res.id} resource={res} />)
+                ) : (
+                    <div className="col-span-full h-32 bg-white dark:bg-slate-800/30 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-500 text-sm">
+                        {searchQuery ? t('dash.no_results') : t('dash.no_active')}
+                    </div>
+                )}
+            </div>
+          </div>
+      )}
+
+      {/* Main Library Grid */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium text-slate-800 dark:text-white flex items-center gap-2">
+                {category === 'all' && t('dash.all')}
+                {category === 'desktops' && t('dash.desktops')}
+                {category === 'apps' && t('dash.apps')}
+                <span className="text-xs font-normal text-slate-500 ml-2 bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded-full">
+                    {visibleResources.length}
+                </span>
+            </h2>
+            
+            {/* Filter/Sort Controls */}
+            <div className="flex gap-2">
+                <button 
+                    onClick={() => setShowActivityLog(!showActivityLog)}
+                    className={`flex items-center gap-1 px-3 py-1 text-xs rounded-md border transition-colors ${
+                        showActivityLog 
+                        ? 'bg-indigo-600 border-indigo-500 text-white' 
+                        : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                    }`}
+                >
+                    <History size={14} /> {t('dash.history')}
+                </button>
+                <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                <select className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded-md px-2 py-1 outline-none focus:border-indigo-500">
+                    <option>{t('dash.sort.name')}</option>
+                    <option>{t('dash.sort.status')}</option>
+                    <option>{t('dash.sort.usage')}</option>
+                </select>
+            </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {visibleResources.length > 0 ? (
+                visibleResources.map(resource => (
+                    <ResourceCard key={resource.id} resource={resource} />
+                ))
+            ) : (
+                <div className="col-span-full py-12 text-center">
+                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400 dark:text-slate-500">
+                        <Search size={32} />
+                    </div>
+                    <h3 className="text-slate-700 dark:text-white font-medium">{t('dash.empty_search')}</h3>
+                    <p className="text-slate-500 text-sm mt-1">{t('dash.empty_hint')}</p>
+                </div>
+            )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Dashboard;
