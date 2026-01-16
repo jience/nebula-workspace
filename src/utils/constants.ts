@@ -1,3 +1,4 @@
+import avatarUrl from '../assets/user-avatar.jpg'
 import { ActivityLogEntry, ResourceType, User, VDIResource } from '../types'
 
 export const MOCK_RESOURCES: VDIResource[] = [
@@ -57,7 +58,7 @@ export const MOCK_USER: User = {
   id: 'u-123',
   name: 'Alex Chen',
   email: 'alex.chen@nebula.corp',
-  avatarUrl: 'https://picsum.photos/200/200',
+  avatarUrl: avatarUrl,
   role: 'Senior DevOps Engineer',
   department: 'Cloud Infrastructure',
   location: 'San Francisco, CA',
