@@ -1,0 +1,37 @@
+@import 'tailwindcss';
+
+/* 启用基于 .dark 类的深色模式切换 */
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* 自定义颜色 */
+  --color-slate-850: #1e293b;
+}
+
+/*@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');*/
+body {
+  font-family: 'Inter', sans-serif;
+  /* Background color is now handled by React components via Tailwind classes */
+  overflow: hidden; /* Prevent body scroll for app-like feel */
+}
+/* Custom scrollbar for Webkit */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #94a3b8; /* Light mode thumb */
+  border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155; /* Dark mode thumb */
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}

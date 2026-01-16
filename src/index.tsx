@@ -1,21 +1,19 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import { LanguageProvider } from './contexts/LanguageContext';
-import { ThemeProvider } from './contexts/ThemeContext';
+import ReactDOM from 'react-dom/client'
+import App from './App'
+import { LanguageProvider } from './contexts/LanguageContext'
+import { ThemeProvider } from './contexts/ThemeContext'
+import './styles/index.css'
 
-const rootElement = document.getElementById('root');
+const rootElement = document.getElementById('root')
 if (!rootElement) {
-  throw new Error("Could not find root element to mount to");
+  throw new Error('Could not find root element to mount to')
 }
 
-const root = ReactDOM.createRoot(rootElement);
+const root = ReactDOM.createRoot(rootElement)
 root.render(
-    <React.StrictMode>
-        <ThemeProvider>
-            <LanguageProvider>
-                <App/>
-            </LanguageProvider>
-        </ThemeProvider>
-    </React.StrictMode>
-);
+  <ThemeProvider>
+    <LanguageProvider>
+      <App />
+    </LanguageProvider>
+  </ThemeProvider>
+)

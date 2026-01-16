@@ -1,4 +1,4 @@
-import { ResourceType, VDIResource, ActivityLogEntry, User } from './types';
+import { ActivityLogEntry, ResourceType, User, VDIResource } from '../types'
 
 export const MOCK_RESOURCES: VDIResource[] = [
   {
@@ -9,7 +9,7 @@ export const MOCK_RESOURCES: VDIResource[] = [
     status: 'running',
     region: 'US-East (N. Virginia)',
     cpu: 8,
-    ram: 32
+    ram: 32,
   },
   {
     id: 'res-2',
@@ -19,7 +19,7 @@ export const MOCK_RESOURCES: VDIResource[] = [
     status: 'stopped',
     region: 'EU-West (London)',
     cpu: 4,
-    ram: 16
+    ram: 16,
   },
   {
     id: 'res-3',
@@ -29,7 +29,7 @@ export const MOCK_RESOURCES: VDIResource[] = [
     status: 'running',
     region: 'US-East (N. Virginia)',
     cpu: 2,
-    ram: 8
+    ram: 8,
   },
   {
     id: 'res-4',
@@ -39,7 +39,7 @@ export const MOCK_RESOURCES: VDIResource[] = [
     status: 'maintenance',
     region: 'Asia-Pacific (Tokyo)',
     cpu: 2,
-    ram: 4
+    ram: 4,
   },
   {
     id: 'res-5',
@@ -49,9 +49,9 @@ export const MOCK_RESOURCES: VDIResource[] = [
     status: 'running',
     region: 'US-West (Oregon)',
     cpu: 12,
-    ram: 64
-  }
-];
+    ram: 64,
+  },
+]
 
 export const MOCK_USER: User = {
   id: 'u-123',
@@ -62,8 +62,8 @@ export const MOCK_USER: User = {
   department: 'Cloud Infrastructure',
   location: 'San Francisco, CA',
   status: 'online',
-  joinDate: 'March 2022'
-};
+  joinDate: 'March 2022',
+}
 
 // Mock latency data for the dashboard chart
 export const LATENCY_DATA = [
@@ -74,7 +74,7 @@ export const LATENCY_DATA = [
   { time: '10:20', ms: 24 },
   { time: '10:25', ms: 20 },
   { time: '10:30', ms: 21 },
-];
+]
 
 export const MOCK_ACTIVITY_LOG: ActivityLogEntry[] = [
   {
@@ -83,7 +83,7 @@ export const MOCK_ACTIVITY_LOG: ActivityLogEntry[] = [
     resourceName: 'Dev Workstation Alpha',
     type: ResourceType.DESKTOP,
     action: 'LAUNCHED',
-    timestamp: '2 mins ago'
+    timestamp: '2 mins ago',
   },
   {
     id: 'log-2',
@@ -91,7 +91,7 @@ export const MOCK_ACTIVITY_LOG: ActivityLogEntry[] = [
     resourceName: 'VS Code Remote',
     type: ResourceType.APPLICATION,
     action: 'DISCONNECTED',
-    timestamp: '45 mins ago'
+    timestamp: '45 mins ago',
   },
   {
     id: 'log-3',
@@ -99,7 +99,7 @@ export const MOCK_ACTIVITY_LOG: ActivityLogEntry[] = [
     resourceName: 'VS Code Remote',
     type: ResourceType.APPLICATION,
     action: 'LAUNCHED',
-    timestamp: '1 hour ago'
+    timestamp: '1 hour ago',
   },
   {
     id: 'log-4',
@@ -107,7 +107,7 @@ export const MOCK_ACTIVITY_LOG: ActivityLogEntry[] = [
     resourceName: 'Linux Build Server',
     type: ResourceType.DESKTOP,
     action: 'STOPPED',
-    timestamp: '3 hours ago'
+    timestamp: '3 hours ago',
   },
   {
     id: 'log-5',
@@ -115,7 +115,7 @@ export const MOCK_ACTIVITY_LOG: ActivityLogEntry[] = [
     resourceName: 'Creative Suite Host',
     type: ResourceType.DESKTOP,
     action: 'DISCONNECTED',
-    timestamp: 'Yesterday, 5:30 PM'
+    timestamp: 'Yesterday, 5:30 PM',
   },
   {
     id: 'log-6',
@@ -123,7 +123,7 @@ export const MOCK_ACTIVITY_LOG: ActivityLogEntry[] = [
     resourceName: 'Creative Suite Host',
     type: ResourceType.DESKTOP,
     action: 'LAUNCHED',
-    timestamp: 'Yesterday, 9:00 AM'
+    timestamp: 'Yesterday, 9:00 AM',
   },
   {
     id: 'log-7',
@@ -131,6 +131,6 @@ export const MOCK_ACTIVITY_LOG: ActivityLogEntry[] = [
     resourceName: 'SAP GUI',
     type: ResourceType.APPLICATION,
     action: 'DISCONNECTED',
-    timestamp: '2 days ago'
-  }
-];
+    timestamp: '2 days ago',
+  },
+]
