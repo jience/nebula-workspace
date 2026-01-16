@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, Mail, ArrowRight, ShieldCheck, Server, ChevronUp, Globe, Activity, Check, Minus, Square, X, Plus, Save } from 'lucide-react';
+import { Lock, Mail, ArrowRight, ShieldCheck, Server, ChevronUp, Globe, Activity, Check, Minus, Square, X, Plus, Save, User } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface LoginProps {
@@ -140,17 +140,17 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl dark:shadow-2xl p-8 relative">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider ml-1">{t('login.email')}</label>
+              <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider ml-1">{t('login.identifier')}</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail size={16} className="text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-500 dark:group-focus-within:text-indigo-400 transition-colors" />
+                  <User size={16} className="text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-500 dark:group-focus-within:text-indigo-400 transition-colors" />
                 </div>
                 <input
-                  type="email"
+                  type="text"
                   required
-                  defaultValue="alex.chen@nebula.corp"
+                  defaultValue="alex.chen"
                   className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
-                  placeholder="name@company.com"
+                  placeholder={t('login.identifier_placeholder')}
                 />
               </div>
             </div>

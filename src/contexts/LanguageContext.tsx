@@ -27,7 +27,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Login
     'login.title': 'Nebula Client',
     'login.subtitle': 'Enterprise Workspace Access',
-    'login.email': 'Work Email',
+    'login.identifier': 'Email or Username',
+    'login.identifier_placeholder': 'username or name@company.com',
     'login.password': 'Password',
     'login.remember': 'Remember me',
     'login.forgot': 'Forgot password?',
@@ -139,7 +140,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Login
     'login.title': '星云客户端',
     'login.subtitle': '企业级工作空间接入',
-    'login.email': '工作邮箱',
+    'login.identifier': '邮箱或用户名',
+    'login.identifier_placeholder': '用户名或工作邮箱',
     'login.password': '密码',
     'login.remember': '记住我',
     'login.forgot': '忘记密码？',
@@ -251,7 +253,8 @@ const translations: Record<Language, Record<string, string>> = {
     // Login
     'login.title': 'Nebula クライアント',
     'login.subtitle': 'エンタープライズ ワークスペース',
-    'login.email': 'メールアドレス',
+    'login.identifier': 'メールアドレスまたはユーザー名',
+    'login.identifier_placeholder': 'ユーザー名またはメールアドレス',
     'login.password': 'パスワード',
     'login.remember': 'ログイン状態を保持',
     'login.forgot': 'パスワードをお忘れですか？',
