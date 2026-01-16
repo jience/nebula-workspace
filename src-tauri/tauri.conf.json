@@ -13,8 +13,12 @@
     "windows": [
       {
         "title": "nebula",
-        "width": 800,
-        "height": 600
+        "width": 1280,
+        "height": 800,
+        "decorations": false,
+        "center": true,
+        "minHeight": 720,
+        "minWidth": 960
       }
     ],
     "security": {
