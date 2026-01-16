@@ -1,6 +1,7 @@
 import { Activity, ArrowRight, Check, ChevronUp, Globe, Lock, Minus, Plus, Save, Server, ShieldCheck, Square, User, X } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useWindowOption } from '../hooks/useWindowOption'
 
 interface LoginProps {
   onLogin: () => void
@@ -24,6 +25,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [loading, setLoading] = useState(false)
   const { t } = useLanguage()
 
+  const { handleClose, handleMaximize, handleMinus } = useWindowOption()
   // Gateway State
   const [showGateways, setShowGateways] = useState(false)
 
@@ -106,13 +108,21 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     <div className="h-screen w-screen bg-slate-50 dark:bg-[#020617] flex items-center justify-center relative overflow-hidden font-sans select-none drag-region transition-colors duration-300">
       {/* Window Controls (Top Right) */}
       <div data-tauri-drag-region className="absolute top-0 left-0 p-4 flex items-center gap-1 z-50 no-drag w-full justify-end">
-        <button className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" title="Minimize">
+        <button
+          onClick={handleMinus}
+          className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          title="Minimize"
+        >
           <Minus size={20} />
         </button>
-        <button className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" title="Maximize">
+        <button
+          onClick={handleMaximize}
+          className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          title="Maximize"
+        >
           <Square size={16} />
         </button>
-        <button className="p-2 text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors" title="Close">
+        <button onClick={handleClose} className="p-2 text-slate-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors" title="Close">
           <X size={20} />
         </button>
       </div>

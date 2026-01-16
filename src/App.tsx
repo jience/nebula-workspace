@@ -7,6 +7,7 @@ import { SettingsModal } from './components/SettingsModal'
 import { UserProfileModal } from './components/UserProfileModal'
 import VDIViewer from './components/VDIViewer'
 import { useLanguage } from './contexts/LanguageContext'
+import { useWindowOption } from './hooks/useWindowOption'
 import { VDIResource } from './types'
 import { MOCK_USER } from './utils/constants'
 
@@ -19,6 +20,7 @@ const App: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const { t } = useLanguage()
+  const { handleClose, handleMaximize, handleMinus } = useWindowOption()
 
   const handleLogout = () => {
     setIsLoggingOut(true)
@@ -154,9 +156,9 @@ const App: React.FC = () => {
 
             {/* Window Controls Simulation (Visual Only) */}
             <div className="flex items-center gap-2 ml-2">
-              <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
-              <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
-              <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
+              <div onClick={handleMinus} className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
+              <div onClick={handleMaximize} className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
+              <div onClick={handleClose} className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
             </div>
           </div>
         </header>
