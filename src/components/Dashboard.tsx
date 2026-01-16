@@ -410,25 +410,27 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
                                         e.stopPropagation();
                                         onLaunch(resource);
                                     }}
-                                    className="flex items-center gap-2 px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-full shadow-xl transform scale-95 group-hover:scale-100 transition-all"
+                                    className="flex items-center gap-2 px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-full shadow-xl transform scale-95 group-hover:scale-100 transition-all mb-2"
                                 >
-                                    <Play size={16} fill="currentColor" /> 
-                                    {t('dash.launch')}
+                                    <Monitor size={16} fill="currentColor" /> 
+                                    Connect
                                 </button>
                                 <div className="flex gap-2">
                                     <button 
                                         onClick={(e) => handlePowerRequest(e, resource, 'shutdown')}
-                                        className="p-2.5 bg-white/10 hover:bg-amber-500/80 text-white rounded-full backdrop-blur-md transition-colors border border-white/20"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-amber-500/90 text-white rounded-full backdrop-blur-md transition-colors border border-white/20 text-xs font-medium"
                                         title="Shutdown"
                                     >
-                                        <Power size={18} />
+                                        <Power size={14} />
+                                        Shutdown
                                     </button>
                                     <button 
                                         onClick={(e) => handlePowerRequest(e, resource, 'force_off')}
-                                        className="p-2.5 bg-white/10 hover:bg-red-500/80 text-white rounded-full backdrop-blur-md transition-colors border border-white/20"
+                                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-red-500/90 text-white rounded-full backdrop-blur-md transition-colors border border-white/20 text-xs font-medium"
                                         title="Force Power Off"
                                     >
-                                        <PlugZap size={18} />
+                                        <PlugZap size={14} />
+                                        Force Off
                                     </button>
                                 </div>
                             </>
