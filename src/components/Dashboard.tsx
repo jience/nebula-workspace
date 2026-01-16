@@ -1,5 +1,7 @@
 import { AlertTriangle, AppWindow, CheckCircle2, Clock, Command, Cpu, Globe, History, Laptop, Loader2, Monitor, Play, PlugZap, Power, Search, Server, Star, Wifi, X, Zap } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
+import pic1 from '../assets/res-1.jpg'
+import pic2 from '../assets/res-2.jpg'
 import { useLanguage } from '../contexts/LanguageContext'
 import { ResourceType, VDIResource } from '../types'
 import { MOCK_ACTIVITY_LOG, MOCK_RESOURCES } from '../utils/constants'
@@ -80,7 +82,7 @@ const ResourceDetailsModal: React.FC<ModalProps> = ({ resource, onClose, onLaunc
       <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header Image Area */}
         <div className="h-32 bg-slate-100 dark:bg-slate-800 relative">
-          <div className="absolute inset-0 bg-cover bg-center opacity-50" style={{ backgroundImage: `url('https://picsum.photos/seed/${resource.id}/600/400')` }} />
+          <div className="absolute inset-0 bg-cover bg-center opacity-50" style={{ backgroundImage: `url('${pic1}')` }} />
           <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent"></div>
 
           <div className="absolute top-4 right-4 flex items-center gap-2">
@@ -344,7 +346,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
             <>
               <div
                 className="absolute inset-x-2 top-2 bottom-0 bg-cover bg-center rounded-t-lg shadow-2xl transition-transform duration-500 group-hover:scale-[1.02] origin-bottom"
-                style={{ backgroundImage: `url('https://picsum.photos/seed/${resource.id}/600/400')` }}
+                style={{ backgroundImage: `url('${pic2}')` }}
               />
               {/* Simulated Taskbar inside preview */}
               <div className="absolute inset-x-2 bottom-0 h-3 bg-slate-900/80 backdrop-blur-sm rounded-b-none z-10 flex items-center justify-center gap-0.5 opacity-80">
