@@ -58,6 +58,12 @@ const translations: Record<Language, Record<string, string>> = {
     'dash.sort.status': 'Sort by Status',
     'dash.sort.usage': 'Sort by Usage',
 
+    // Log
+    'log.search': 'Search activity...',
+    'log.clear': 'Clear History',
+    'log.just_now': 'Just now',
+    'log.empty': 'No activity recorded',
+
     // Modal
     'modal.status': 'Current Status',
     'modal.close': 'Close',
@@ -171,6 +177,12 @@ const translations: Record<Language, Record<string, string>> = {
     'dash.sort.status': '按状态排序',
     'dash.sort.usage': '按使用率排序',
 
+    // Log
+    'log.search': '搜索日志...',
+    'log.clear': '清除历史',
+    'log.just_now': '刚刚',
+    'log.empty': '暂无活动记录',
+
     // Modal
     'modal.status': '当前状态',
     'modal.close': '关闭',
@@ -283,6 +295,12 @@ const translations: Record<Language, Record<string, string>> = {
     'dash.sort.name': '名前順',
     'dash.sort.status': 'ステータス順',
     'dash.sort.usage': '使用率順',
+
+    // Log
+    'log.search': 'ログを検索...',
+    'log.clear': '履歴を消去',
+    'log.just_now': 'たった今',
+    'log.empty': 'アクティビティはありません',
 
     // Modal
     'modal.status': '現在のステータス',

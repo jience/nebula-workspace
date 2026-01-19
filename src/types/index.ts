@@ -50,6 +50,6 @@ export interface ActivityLogEntry {
   resourceId: string;
   resourceName: string;
   type: ResourceType;
-  action: 'LAUNCHED' | 'DISCONNECTED' | 'STOPPED';
+  action: 'LAUNCHED' | 'DISCONNECTED' | 'STOPPED' | 'POWER_ON';
   timestamp: string;
 }
