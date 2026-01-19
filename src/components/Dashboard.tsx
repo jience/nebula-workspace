@@ -468,31 +468,79 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
     const theme = getResourceTheme(resource);
     const ThemeIcon = theme.icon;
 
-    // Determine subtype icon and badge style
-    const getSubTypeInfo = (subType: ResourceSubType) => {
+    // Determine subtype visual styles
+    const getSubTypeStyles = (subType: ResourceSubType) => {
       switch (subType) {
         case ResourceSubType.DESKTOP_EXCLUSIVE:
-          return { icon: Shield, label: t('subtype.desktop_exclusive'), color: 'text-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' };
+          return {
+            icon: Shield,
+            label: t('subtype.desktop_exclusive'),
+            border: 'group-hover:border-indigo-500 dark:group-hover:border-indigo-400',
+            shadow: 'hover:shadow-indigo-500/10',
+            badge: 'bg-indigo-500/90 text-white border-indigo-400 shadow-indigo-500/20',
+            indicator: 'bg-indigo-500',
+            bodyHighlight: 'group-hover:from-indigo-50/50 dark:group-hover:from-indigo-900/10'
+          };
         case ResourceSubType.DESKTOP_SHARED:
-          return { icon: Users, label: t('subtype.desktop_shared'), color: 'text-blue-500 bg-blue-50 dark:bg-blue-900/20' };
+          return {
+            icon: Users,
+            label: t('subtype.desktop_shared'),
+            border: 'group-hover:border-cyan-500 dark:group-hover:border-cyan-400',
+            shadow: 'hover:shadow-cyan-500/10',
+            badge: 'bg-cyan-500/90 text-white border-cyan-400 shadow-cyan-500/20',
+            indicator: 'bg-cyan-500',
+            bodyHighlight: 'group-hover:from-cyan-50/50 dark:group-hover:from-cyan-900/10'
+          };
         case ResourceSubType.DESKTOP_REVERTIBLE:
-          return { icon: RefreshCw, label: t('subtype.desktop_revertible'), color: 'text-amber-500 bg-amber-50 dark:bg-amber-900/20' };
+          return {
+            icon: RefreshCw,
+            label: t('subtype.desktop_revertible'),
+            border: 'group-hover:border-amber-500 dark:group-hover:border-amber-400',
+            shadow: 'hover:shadow-amber-500/10',
+            badge: 'bg-amber-500/90 text-white border-amber-400 shadow-amber-500/20',
+            indicator: 'bg-amber-500',
+            bodyHighlight: 'group-hover:from-amber-50/50 dark:group-hover:from-amber-900/10'
+          };
         case ResourceSubType.APP_EXCLUSIVE:
-          return { icon: Shield, label: t('subtype.app_exclusive'), color: 'text-pink-500 bg-pink-50 dark:bg-pink-900/20' };
+          return {
+            icon: Shield,
+            label: t('subtype.app_exclusive'),
+            border: 'group-hover:border-pink-500 dark:group-hover:border-pink-400',
+            shadow: 'hover:shadow-pink-500/10',
+            badge: 'bg-pink-500/90 text-white border-pink-400 shadow-pink-500/20',
+            indicator: 'bg-pink-500',
+            bodyHighlight: 'group-hover:from-pink-50/50 dark:group-hover:from-pink-900/10'
+          };
         case ResourceSubType.APP_SHARED:
-          return { icon: Users, label: t('subtype.app_shared'), color: 'text-purple-500 bg-purple-50 dark:bg-purple-900/20' };
+          return {
+            icon: Users,
+            label: t('subtype.app_shared'),
+            border: 'group-hover:border-purple-500 dark:group-hover:border-purple-400',
+            shadow: 'hover:shadow-purple-500/10',
+            badge: 'bg-purple-500/90 text-white border-purple-400 shadow-purple-500/20',
+            indicator: 'bg-purple-500',
+            bodyHighlight: 'group-hover:from-purple-50/50 dark:group-hover:from-purple-900/10'
+          };
         default:
-          return { icon: Info, label: 'Unknown', color: 'text-slate-500' };
+          return {
+            icon: Info,
+            label: 'Unknown',
+            border: 'group-hover:border-slate-400',
+            shadow: '',
+            badge: 'bg-slate-600 text-slate-200',
+            indicator: 'bg-slate-500',
+            bodyHighlight: ''
+          };
       }
     }
 
-    const subTypeInfo = getSubTypeInfo(resource.subType);
-    const SubTypeIcon = subTypeInfo.icon;
+    const styles = getSubTypeStyles(resource.subType);
+    const SubTypeIcon = styles.icon;
 
     return (
       <div
         onClick={() => !isProcessing && setSelectedResourceId(resource.id)}
-        className={`group relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl transition-all duration-300 hover:shadow-xl hover:border-indigo-300 dark:hover:border-indigo-500 overflow-hidden flex flex-col cursor-pointer ${
+        className={`group relative bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl transition-all duration-300 hover:shadow-xl ${styles.border} ${styles.shadow} overflow-hidden flex flex-col cursor-pointer ${
           large ? 'col-span-1 md:col-span-2 row-span-2' : ''
         } ${isProcessing ? 'pointer-events-none opacity-90' : ''}`}
       >
@@ -519,11 +567,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
             </div>
           </div>
 
-          {/* SubType Badge - Prominent on the "Desktop" face */}
+          {/* SubType Badge - Updated Style */}
           <div className="absolute top-3 left-3 z-20">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/20 backdrop-blur-md border border-white/10 shadow-sm text-white text-[10px] font-bold uppercase tracking-wider">
-              <SubTypeIcon size={12} className={subTypeInfo.color.split(' ')[0]} />
-              <span>{subTypeInfo.label}</span>
+            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md backdrop-blur-md border shadow-sm text-[10px] font-bold uppercase tracking-wider ${styles.badge}`}>
+              <SubTypeIcon size={12} fill="currentColor" className="opacity-90" />
+              <span>{styles.label}</span>
             </div>
           </div>
 
@@ -618,37 +666,39 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
         </div>
 
         {/* Card Body */}
-        <div className="p-4 flex-1 flex flex-col bg-white dark:bg-slate-800">
-          <div className="flex items-start justify-between mb-2">
-            <div className="overflow-hidden w-full">
-              <div className="flex justify-between items-start">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors pr-6">
-                  {resource.name}
-                 </h3>
+        <div className={`p-4 flex-1 flex flex-col relative bg-white dark:bg-slate-800 bg-gradient-to-br from-transparent to-transparent ${styles.bodyHighlight} transition-all duration-300`}>
+            {/* Visual Indicator Bar on Left */}
+            <div className={`absolute left-0 top-6 bottom-6 w-0.5 rounded-r ${styles.indicator} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+            <div className="flex items-start justify-between mb-2">
+              <div className="overflow-hidden w-full">
+                <div className="flex justify-between items-start">
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors pr-6">
+                    {resource.name}
+                  </h3>
 
-                {/* Favorite Star Button (Moved to body for cleaner card face) */}
-                <button
-                  className={`p-1 -mr-1 -mt-1 rounded transition-colors ${
-                    isFavorite
-                      ? 'text-yellow-500 hover:text-yellow-600'
-                      : 'text-slate-300 dark:text-slate-600 hover:text-yellow-400'
-                  }`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(resource.id);
-                  }}
-                >
+                  {/* Favorite Star Button (Moved to body for cleaner card face) */}
+                  <button
+                    className={`p-1 -mr-1 -mt-1 rounded transition-colors ${
+                      isFavorite
+                        ? 'text-yellow-500 hover:text-yellow-600'
+                        : 'text-slate-300 dark:text-slate-600 hover:text-yellow-400'
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(resource.id);
+                    }}
+                  >
                   <Star size={16} fill={isFavorite ? "currentColor" : "none"} />
-                </button>
-              </div>
+                  </button>
+                </div>
 
-              <div className="flex items-center gap-2 mt-1.5">
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                  {isDesktop ? <Laptop size={12} /> : <AppWindow size={12} />}
-                  <span className="truncate max-w-[120px]">{resource.os}</span>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                    {isDesktop ? <Laptop size={12} /> : <AppWindow size={12} />}
+                    <span className="truncate max-w-[120px]">{resource.os}</span>
+                  </div>
                 </div>
               </div>
-            </div>
           </div>
 
           <div className="mt-auto pt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-700/50">
