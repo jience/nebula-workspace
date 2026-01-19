@@ -598,6 +598,70 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
         />
       )}
 
+      {/* Welcome / Quick Access Section - Only show on 'all' view */}
+      {category === 'all' && (
+        <div className="mb-8">
+          <h2 className="text-lg font-medium text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+            <Clock size={18} className="text-indigo-600 dark:text-indigo-400" /> {t('dash.recent')}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {runningResources.length > 0 ? (
+              runningResources.map((res) => <ResourceCard key={res.id} resource={res} />)
+            ) : (
+              <div className="col-span-full h-32 bg-white dark:bg-slate-800/30 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-500 text-sm">
+                {searchQuery ? t('dash.no_results') : t('dash.no_active')}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Main Library Grid */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-medium text-slate-800 dark:text-white flex items-center gap-2">
+            {category === 'all' && t('dash.all')}
+            {category === 'desktops' && t('dash.desktops')}
+            {category === 'apps' && t('dash.apps')}
+            <span className="text-xs font-normal text-slate-500 ml-2 bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded-full">{visibleResources.length}</span>
+          </h2>
+
+          {/* Filter/Sort Controls */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowActivityLog(!showActivityLog)}
+              className={`flex items-center gap-1 px-3 py-1 text-xs rounded-md border transition-colors ${
+                showActivityLog
+                ? 'bg-indigo-600 border-indigo-500 text-white'
+                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+              }`}
+            >
+              <History size={14} /> {t('dash.history')}
+            </button>
+            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+            <select className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded-md px-2 py-1 outline-none focus:border-indigo-500">
+              <option>{t('dash.sort.name')}</option>
+              <option>{t('dash.sort.status')}</option>
+               <option>{t('dash.sort.usage')}</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {visibleResources.length > 0 ? (
+            visibleResources.map((resource) => <ResourceCard key={resource.id} resource={resource} />)
+          ) : (
+            <div className="col-span-full py-12 text-center">
+              <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400 dark:text-slate-500">
+                <Search size={32} />
+              </div>
+              <h3 className="text-slate-700 dark:text-white font-medium">{t('dash.empty_search')}</h3>
+              <p className="text-slate-500 text-sm mt-1">{t('dash.empty_hint')}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Activity Log Sidebar */}
       <div
         className={`fixed top-14 right-0 bottom-8 w-80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-l border-slate-200 dark:border-slate-700 shadow-2xl z-30 transform transition-transform duration-300 ease-in-out flex flex-col ${
@@ -687,70 +751,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
           <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 text-[10px] text-center text-slate-400 shrink-0">
             Showing {filteredLogs.length} events
           </div>
-        </div>
-      </div>
-
-      {/* Welcome / Quick Access Section - Only show on 'all' view */}
-      {category === 'all' && (
-        <div className="mb-8">
-          <h2 className="text-lg font-medium text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-            <Clock size={18} className="text-indigo-600 dark:text-indigo-400" /> {t('dash.recent')}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {runningResources.length > 0 ? (
-              runningResources.map((res) => <ResourceCard key={res.id} resource={res} />)
-            ) : (
-              <div className="col-span-full h-32 bg-white dark:bg-slate-800/30 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-500 text-sm">
-                {searchQuery ? t('dash.no_results') : t('dash.no_active')}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Main Library Grid */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-medium text-slate-800 dark:text-white flex items-center gap-2">
-            {category === 'all' && t('dash.all')}
-            {category === 'desktops' && t('dash.desktops')}
-            {category === 'apps' && t('dash.apps')}
-            <span className="text-xs font-normal text-slate-500 ml-2 bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded-full">{visibleResources.length}</span>
-          </h2>
-
-          {/* Filter/Sort Controls */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowActivityLog(!showActivityLog)}
-              className={`flex items-center gap-1 px-3 py-1 text-xs rounded-md border transition-colors ${
-                showActivityLog
-                  ? 'bg-indigo-600 border-indigo-500 text-white'
-                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-              }`}
-            >
-              <History size={14} /> {t('dash.history')}
-            </button>
-            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
-            <select className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded-md px-2 py-1 outline-none focus:border-indigo-500">
-              <option>{t('dash.sort.name')}</option>
-              <option>{t('dash.sort.status')}</option>
-              <option>{t('dash.sort.usage')}</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {visibleResources.length > 0 ? (
-            visibleResources.map((resource) => <ResourceCard key={resource.id} resource={resource} />)
-          ) : (
-            <div className="col-span-full py-12 text-center">
-              <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400 dark:text-slate-500">
-                <Search size={32} />
-              </div>
-              <h3 className="text-slate-700 dark:text-white font-medium">{t('dash.empty_search')}</h3>
-              <p className="text-slate-500 text-sm mt-1">{t('dash.empty_hint')}</p>
-            </div>
-          )}
         </div>
       </div>
     </div>
