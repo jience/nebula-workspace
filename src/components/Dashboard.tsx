@@ -197,9 +197,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
   const [showActivityLog, setShowActivityLog] = useState(false)
   const [activityLog, setActivityLog] = useState<ActivityLogEntry[]>(MOCK_ACTIVITY_LOG);
   const [logSearchQuery, setLogSearchQuery] = useState('');
+  const [isLoadingMoreLogs, setIsLoadingMoreLogs] = useState(false);
 
-
-    // Power Management States
+  // Power Management States
   const [confirmationState, setConfirmationState] = useState<{ isOpen: boolean; resourceId: string; resourceName: string; type: 'shutdown' | 'force_off' | null }>({
     isOpen: false,
     resourceId: '',
@@ -255,6 +255,32 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
       timestamp: t('log.just_now')
     };
     setActivityLog(prev => [newEntry, ...prev]);
+  };
+
+  const handleLogScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    // Load more when user scrolls near bottom and not currently searching or loading
+    if (scrollHeight - scrollTop - clientHeight < 20 && !isLoadingMoreLogs && !logSearchQuery) {
+      loadMoreHistory();
+    }
+  };
+
+  const loadMoreHistory = () => {
+    setIsLoadingMoreLogs(true);
+    // Simulate API delay
+    setTimeout(() => {
+      const newLogs: ActivityLogEntry[] = Array(5).fill(null).map((_, i) => ({
+        id: `log-old-${Date.now()}-${i}`,
+        resourceId: 'res-unknown',
+        resourceName: Math.random() > 0.5 ? 'Dev Workstation Alpha' : 'VS Code Remote',
+        type: Math.random() > 0.5 ? ResourceType.DESKTOP : ResourceType.APPLICATION,
+        action: Math.random() > 0.5 ? 'LAUNCHED' : 'DISCONNECTED',
+        timestamp: `${Math.floor(Math.random() * 5) + 3} days ago`
+      }));
+
+      setActivityLog(prev => [...prev, ...newLogs]);
+      setIsLoadingMoreLogs(false);
+    }, 1500);
   };
 
   // Wrapper for launching to track history
@@ -579,7 +605,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
         }`}
       >
         <div className="h-full flex flex-col">
-          <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+          <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50 shrink-0">
             <h3 className="text-sm font-semibold text-slate-800 dark:text-white flex items-center gap-2">
               <History size={16} className="text-indigo-600 dark:text-indigo-400" /> {t('dash.recent_activity')}
             </h3>
@@ -589,7 +615,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
           </div>
 
           {/* Log Search & Filters */}
-          <div className="p-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-2">
+          <div className="p-3 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-2 shrink-0">
             <div className="relative flex-1">
               <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -610,9 +636,13 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
           </div>
 
           {/* Log List */}
-          <div className="flex-1 overflow-y-auto">
+          <div
+            className="flex-1 overflow-y-auto"
+            onScroll={handleLogScroll}
+          >
             {filteredLogs.length > 0 ? (
-              filteredLogs.map((log) => (
+              <>
+              {filteredLogs.map((log) => (
                 <div key={log.id} className="p-4 border-b border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
                   <div className="flex items-start gap-3">
                     <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 mt-1 shadow-sm">
@@ -639,7 +669,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
                     <span className="text-[10px] font-mono text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">{log.timestamp}</span>
                   </div>
                 </div>
-                ))
+              ))}
+              {isLoadingMoreLogs && (
+                <div className="p-4 flex justify-center items-center text-slate-400 gap-2">
+                  <Loader2 size={16} className="animate-spin" />
+                  <span className="text-xs">Loading history...</span>
+                </div>
+              )}
+              </>
             ) : (
               <div className="flex flex-col items-center justify-center h-48 text-slate-400">
                 <Filter size={24} className="mb-2 opacity-50" />
@@ -647,7 +684,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
               </div>
             )}
           </div>
-          <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 text-[10px] text-center text-slate-400">
+          <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 text-[10px] text-center text-slate-400 shrink-0">
             Showing {filteredLogs.length} events
           </div>
         </div>
