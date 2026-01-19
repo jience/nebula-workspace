@@ -1,7 +1,5 @@
-import { AlertTriangle, AppWindow, CheckCircle2, Clock, Command, Cpu, Globe, Filter, History, Info, Laptop, Loader2, Monitor, Play, PlugZap, Power, RefreshCw, Search, Server, Shield, Star, Trash2, Users, Wifi, X, Zap } from 'lucide-react'
+import { AlertTriangle, AppWindow, CheckCircle2, Clock, Cpu, Globe, Filter, History, Info, Laptop, LayoutGrid, Loader2, Monitor, Play, PlugZap, Power, RefreshCw, Search, Server, Shield, Star, Terminal, Trash2, Users, Wifi, X, Zap } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
-import pic1 from '../assets/res-1.jpg'
-import pic2 from '../assets/res-2.jpg'
 import { useLanguage } from '../contexts/LanguageContext'
 import { ResourceType, ResourceSubType, VDIResource, ActivityLogEntry } from '../types'
 import { MOCK_ACTIVITY_LOG, MOCK_RESOURCES } from '../utils/constants'
@@ -28,6 +26,60 @@ interface ConfirmationModalProps {
   onConfirm: () => void
   onCancel: () => void
 }
+
+// Helper to determine visual theme based on OS and Type
+const getResourceTheme = (resource: VDIResource) => {
+    const osLower = resource.os.toLowerCase();
+    const isWindows = osLower.includes('windows');
+    const isLinux = osLower.includes('linux') || osLower.includes('ubuntu') || osLower.includes('centos');
+
+    if (resource.type === ResourceType.APPLICATION) {
+        return {
+            gradient: 'bg-gradient-to-br from-violet-600 to-indigo-700',
+            icon: AppWindow,
+            iconColor: 'text-indigo-100',
+            patternOpacity: 0.1,
+            patternSize: '16px 16px',
+            bgClass: 'bg-indigo-900', // Fallback
+            accentColor: 'indigo'
+        };
+    }
+
+    if (isWindows) {
+        return {
+            gradient: 'bg-gradient-to-br from-blue-600 to-sky-700',
+            icon: LayoutGrid, // Represents Windows-like UI
+            iconColor: 'text-blue-50',
+            patternOpacity: 0.15,
+            patternSize: '24px 24px',
+            bgClass: 'bg-blue-900', // Fallback
+            accentColor: 'blue'
+        };
+    }
+
+    if (isLinux) {
+        return {
+            gradient: 'bg-gradient-to-br from-orange-600 to-pink-700', // Ubuntu style
+            icon: Terminal,
+            iconColor: 'text-orange-50',
+            patternOpacity: 0.1,
+            patternSize: '20px 20px',
+            bgClass: 'bg-orange-900', // Fallback
+            accentColor: 'orange'
+        };
+    }
+
+    // Default / Generic
+    return {
+        gradient: 'bg-gradient-to-br from-slate-600 to-slate-800',
+        icon: Monitor,
+        iconColor: 'text-slate-200',
+        patternOpacity: 0.05,
+        patternSize: '40px 40px',
+        bgClass: 'bg-slate-800',
+        accentColor: 'slate'
+    };
+};
 
 const PowerConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, type, resourceName, onConfirm, onCancel }) => {
   if (!isOpen || !type) return null
@@ -76,6 +128,9 @@ const ResourceDetailsModal: React.FC<ModalProps> = ({ resource, onClose, onLaunc
   const { t } = useLanguage()
   if (!resource) return null
 
+  const theme = getResourceTheme(resource);
+  const ThemeIcon = theme.icon;
+
   // Helper to get subtype info for modal
   const getSubTypeLabel = (subType: ResourceSubType) => {
     switch (subType) {
@@ -92,41 +147,49 @@ const ResourceDetailsModal: React.FC<ModalProps> = ({ resource, onClose, onLaunc
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose}></div>
       <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        {/* Header Image Area */}
-        <div className="h-32 bg-slate-100 dark:bg-slate-800 relative">
-          <div className="absolute inset-0 bg-cover bg-center opacity-50" style={{ backgroundImage: `url('${pic1}')` }} />
-          <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-slate-900 to-transparent"></div>
+        {/* Header Visual Area */}
+        <div className={`h-32 relative overflow-hidden ${theme.gradient}`}>
+          {/* Abstract Background Pattern */}
+          <div
+            className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+              backgroundSize: theme.patternSize
+            }}
+          />
+          {/* Big Icon Faded */}
+          <ThemeIcon className="absolute -right-4 -bottom-4 text-white/10 w-48 h-48 rotate-12" />
 
           <div className="absolute top-4 right-4 flex items-center gap-2">
             <button
               onClick={(e) => {
-                e.stopPropagation()
-                onToggleFavorite()
+                e.stopPropagation();
+                onToggleFavorite();
               }}
-              className={`p-2 rounded-full transition-all backdrop-blur-md border border-slate-200 dark:border-white/10 ${
+              className={`p-2 rounded-full transition-all backdrop-blur-md border border-white/20 ${
                 isFavorite
-                  ? 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/30'
-                  : 'bg-white/60 dark:bg-black/40 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800'
+                  ? 'bg-yellow-400/90 text-yellow-900'
+                  : 'bg-white/10 text-white hover:bg-white/20'
               }`}
             >
-              <Star size={18} fill={isFavorite ? 'currentColor' : 'none'} className={isFavorite ? 'scale-110' : ''} />
+              <Star size={18} fill={isFavorite ? "currentColor" : "none"} className={isFavorite ? "scale-110" : ""} />
             </button>
             <button
               onClick={onClose}
-              className="p-2 bg-white/60 dark:bg-black/40 hover:bg-white dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-full transition-colors backdrop-blur-md border border-slate-200 dark:border-white/10"
+              className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors backdrop-blur-md border border-white/20"
             >
               <X size={18} />
             </button>
           </div>
 
-          <div className="absolute bottom-4 left-6">
-            <div className="flex items-center gap-2 mb-1">
-              {resource.type === ResourceType.DESKTOP ? <Monitor size={16} className="text-indigo-600 dark:text-indigo-400" /> : <AppWindow size={16} className="text-pink-600 dark:text-pink-400" />}
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">{resource.type}</span>
-              <span className="text-xs text-slate-400">•</span>
-              <span className="text-xs font-medium text-slate-600 dark:text-slate-300">{getSubTypeLabel(resource.subType)}</span>
-            </div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{resource.name}</h2>
+          <div className="absolute bottom-4 left-6 z-10">
+              <div className="flex items-center gap-2 mb-1">
+                  <div className="px-1.5 py-0.5 rounded-md bg-white/20 backdrop-blur text-white text-[10px] font-bold uppercase tracking-wider border border-white/10">
+                      {resource.type}
+                  </div>
+                  <span className="text-xs font-medium text-white/80">{getSubTypeLabel(resource.subType)}</span>
+              </div>
+              <h2 className="text-2xl font-bold text-white tracking-tight">{resource.name}</h2>
           </div>
         </div>
 
@@ -192,7 +255,7 @@ const ResourceDetailsModal: React.FC<ModalProps> = ({ resource, onClose, onLaunc
                 onLaunch(resource)
                 onClose()
               }}
-              className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg shadow-lg shadow-indigo-600/20 transition-all active:scale-95 flex items-center justify-center gap-2"
+              className={`flex-1 py-2.5 text-white font-medium rounded-lg shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${theme.gradient}`}
             >
               <Play size={16} fill="currentColor" /> {t('modal.launch')}
             </button>
@@ -401,6 +464,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
     // Simulate connection signal strength based on running status
     const signalStrength = isRunning ? 4 : 0
 
+    // Get Theme
+    const theme = getResourceTheme(resource);
+    const ThemeIcon = theme.icon;
+
     // Determine subtype icon and badge style
     const getSubTypeInfo = (subType: ResourceSubType) => {
       switch (subType) {
@@ -429,8 +496,53 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
           large ? 'col-span-1 md:col-span-2 row-span-2' : ''
         } ${isProcessing ? 'pointer-events-none opacity-90' : ''}`}
       >
-        {/* Header / Preview Area */}
+        {/* Header / Screen Preview Area - No Image, Pure CSS  */}
         <div className={`relative w-full ${large ? 'h-56' : 'h-40'} overflow-hidden bg-slate-900 border-b border-slate-200 dark:border-slate-800`}>
+
+          {/* The Main "Screen" Gradient */}
+          <div className={`absolute inset-0 ${theme.gradient} transition-transform duration-500 group-hover:scale-105`}>
+            {/* Abstract Pattern */}
+            <div
+              className="absolute inset-0"
+              style={{
+                opacity: theme.patternOpacity,
+                backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+                backgroundSize: theme.patternSize
+              }}
+            />
+          </div>
+
+          {/* Central OS Icon / Brand */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-xl transform transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-2">
+              <ThemeIcon size={36} className="text-white drop-shadow-md" />
+            </div>
+          </div>
+
+          {/* SubType Badge - Prominent on the "Desktop" face */}
+          <div className="absolute top-3 left-3 z-20">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-black/20 backdrop-blur-md border border-white/10 shadow-sm text-white text-[10px] font-bold uppercase tracking-wider">
+              <SubTypeIcon size={12} className={subTypeInfo.color.split(' ')[0]} />
+              <span>{subTypeInfo.label}</span>
+            </div>
+          </div>
+
+          {/* Status Badge (Top Right) */}
+          <div className="absolute top-3 right-3 z-20">
+            <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border shadow-sm ${
+              isRunning
+                ? 'bg-emerald-500/90 border-emerald-400 text-white'
+                : resource.status === 'maintenance'
+                  ? 'bg-amber-500/90 border-amber-400 text-white'
+                  : 'bg-slate-600/90 border-slate-500 text-slate-100'
+            }`}>
+              <div className={`w-1.5 h-1.5 rounded-full bg-current ${isRunning ? 'animate-pulse' : ''}`}></div>
+              {resource.status === 'running' && t('dash.running')}
+              {resource.status === 'stopped' && t('dash.stopped')}
+              {resource.status === 'maintenance' && t('dash.maintenance')}
+            </div>
+          </div>
+
           {/* Loading Overlay */}
           {isProcessing && (
             <div className="absolute inset-0 z-40 bg-slate-900/60 backdrop-blur-[2px] flex items-center justify-center">
@@ -441,104 +553,45 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
             </div>
           )}
 
-          {/* Desktop: Screen Preview Style */}
-          {isDesktop && (
-            <>
-              <div
-                className="absolute inset-x-2 top-2 bottom-0 bg-cover bg-center rounded-t-lg shadow-2xl transition-transform duration-500 group-hover:scale-[1.02] origin-bottom"
-                style={{ backgroundImage: `url('${pic2}')` }}
-              />
-              {/* Simulated Taskbar inside preview */}
-              <div className="absolute inset-x-2 bottom-0 h-3 bg-slate-900/80 backdrop-blur-sm rounded-b-none z-10 flex items-center justify-center gap-0.5 opacity-80">
-                <div className="w-1 h-1 bg-white/50 rounded-full"></div>
-                <div className="w-1 h-1 bg-white/50 rounded-full"></div>
-              </div>
-            </>
-          )}
+          {/* Hover Control Panel - Slides Up/Fade In */}
+          <div className={`absolute inset-0 bg-slate-900/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center z-30 gap-3 ${isProcessing ? 'hidden' : ''}`}>
 
-          {/* App: Icon Tile Style */}
-          {!isDesktop && (
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 dark:from-indigo-900/20 dark:to-purple-900/20 flex items-center justify-center group-hover:bg-indigo-50 dark:group-hover:bg-slate-800 transition-colors">
-              <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, gray 1px, transparent 0)', backgroundSize: '20px 20px' }}></div>
-              <div className="w-16 h-16 bg-white dark:bg-slate-700 rounded-2xl shadow-lg flex items-center justify-center z-10 group-hover:scale-110 transition-transform duration-300">
-                <Command size={32} className="text-pink-500" />
-              </div>
-            </div>
-          )}
+            {/* Connection Button */}
+            {((isDesktop && resource.status === 'running') || !isDesktop) && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLaunchResource(resource);
+                }}
+                className={`flex items-center gap-2 px-6 py-2.5 text-white font-medium rounded-full shadow-xl transform scale-95 group-hover:scale-100 transition-all mb-2 ${theme.gradient}`}
+              >
+                {isDesktop ? <Monitor size={16} fill="currentColor" /> : <Play size={16} fill="currentColor" />}
+                {isDesktop ? 'Connect' : t('dash.launch')}
+              </button>
+            )}
 
-          {/* Status Badge (Top Right) */}
-          <div className="absolute top-3 right-3 z-20">
-            <div
-              className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border shadow-sm ${
-                isRunning
-                  ? 'bg-emerald-500/90 border-emerald-400 text-white'
-                  : resource.status === 'maintenance'
-                  ? 'bg-amber-500/90 border-amber-400 text-white'
-                  : 'bg-slate-600/90 border-slate-500 text-slate-100'
-              }`}
-            >
-              <div className={`w-1.5 h-1.5 rounded-full bg-current ${isRunning ? 'animate-pulse' : ''}`}></div>
-              {resource.status === 'running' && t('dash.running')}
-              {resource.status === 'stopped' && t('dash.stopped')}
-              {resource.status === 'maintenance' && t('dash.maintenance')}
-            </div>
-          </div>
-
-          {/* Favorite Button (Top Left) */}
-          <button
-            className={`absolute top-3 left-3 p-1.5 rounded-lg backdrop-blur-md transition-all duration-200 z-20 border ${
-              isFavorite
-                ? 'bg-yellow-400/90 border-yellow-400 text-yellow-900 shadow-sm'
-                : 'bg-slate-900/40 border-white/10 text-white/70 hover:bg-slate-900/60 hover:text-white opacity-0 group-hover:opacity-100'
-            }`}
-            onClick={(e) => {
-              e.stopPropagation()
-              toggleFavorite(resource.id)
-            }}
-          >
-            <Star size={14} fill={isFavorite ? 'currentColor' : 'none'} />
-          </button>
-
-          {/* Hover Overlay with Operations */}
-          <div
-            className={`absolute inset-0 bg-black/50 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center z-30 gap-3 ${
-              isProcessing ? 'hidden' : ''
-            }`}
-          >
-            {/* Desktop Operations */}
+            {/* Desktop Power Controls */}
             {isDesktop && (
               <>
                 {resource.status === 'running' && (
-                  <>
+                  <div className="flex gap-2">
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleLaunchResource(resource)
-                      }}
-                      className="flex items-center gap-2 px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-full shadow-xl transform scale-95 group-hover:scale-100 transition-all mb-2"
+                      onClick={(e) => handlePowerRequest(e, resource, 'shutdown')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-amber-500/90 text-white rounded-full backdrop-blur-md transition-colors border border-white/20 text-xs font-medium"
+                      title="Shutdown"
                     >
-                      <Monitor size={16} fill="currentColor" />
-                      Connect
+                      <Power size={14} />
+                      Shutdown
                     </button>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={(e) => handlePowerRequest(e, resource, 'shutdown')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-amber-500/90 text-white rounded-full backdrop-blur-md transition-colors border border-white/20 text-xs font-medium"
-                        title="Shutdown"
-                      >
-                        <Power size={14} />
-                        Shutdown
-                      </button>
-                      <button
-                        onClick={(e) => handlePowerRequest(e, resource, 'force_off')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-red-500/90 text-white rounded-full backdrop-blur-md transition-colors border border-white/20 text-xs font-medium"
-                        title="Force Power Off"
-                      >
-                        <PlugZap size={14} />
-                        Force Off
-                      </button>
-                    </div>
-                  </>
+                    <button
+                      onClick={(e) => handlePowerRequest(e, resource, 'force_off')}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-red-500/90 text-white rounded-full backdrop-blur-md transition-colors border border-white/20 text-xs font-medium"
+                      title="Force Power Off"
+                    >
+                      <PlugZap size={14} />
+                      Force Off
+                    </button>
+                  </div>
                 )}
                 {resource.status === 'stopped' && (
                   <button
@@ -549,41 +602,50 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
                     Power On
                   </button>
                 )}
-                {resource.status === 'maintenance' && <span className="text-white/80 font-medium px-4 py-1.5 bg-white/10 rounded-full backdrop-blur">Maintenance</span>}
+                {resource.status === 'maintenance' && (
+                  <span className="text-white/80 font-medium px-4 py-1.5 bg-white/10 rounded-full backdrop-blur">
+                    Maintenance
+                  </span>
+                )}
               </>
             )}
-
-            {/* App Operations (Usually just Launch) */}
-            {!isDesktop && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleLaunchResource(resource)
-                }}
-                className="flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-full shadow-xl transform scale-90 group-hover:scale-100 transition-all"
-              >
-                <Play size={16} fill="currentColor" />
-                {t('dash.launch')}
-              </button>
-            )}
           </div>
+
+          {/* Simulated Desktop Taskbar Line for realism (Only Desktops) */}
+          {isDesktop && (
+            <div className="absolute inset-x-0 bottom-0 h-1.5 bg-white/20 backdrop-blur-md z-10" />
+          )}
         </div>
 
         {/* Card Body */}
-        <div className="p-4 flex-1 flex flex-col">
+        <div className="p-4 flex-1 flex flex-col bg-white dark:bg-slate-800">
           <div className="flex items-start justify-between mb-2">
-            <div className="overflow-hidden">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{resource.name}</h3>
-              <div className="flex items-center justify-between mt-1.5">
+            <div className="overflow-hidden w-full">
+              <div className="flex justify-between items-start">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors pr-6">
+                  {resource.name}
+                 </h3>
+
+                {/* Favorite Star Button (Moved to body for cleaner card face) */}
+                <button
+                  className={`p-1 -mr-1 -mt-1 rounded transition-colors ${
+                    isFavorite
+                      ? 'text-yellow-500 hover:text-yellow-600'
+                      : 'text-slate-300 dark:text-slate-600 hover:text-yellow-400'
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleFavorite(resource.id);
+                  }}
+                >
+                  <Star size={16} fill={isFavorite ? "currentColor" : "none"} />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 mt-1.5">
                 <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                   {isDesktop ? <Laptop size={12} /> : <AppWindow size={12} />}
-                  <span className="truncate max-w-[100px]">{resource.os}</span>
-                </div>
-
-                {/* SubType Badge */}
-                <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide border border-transparent ${subTypeInfo.color}`}>
-                  <SubTypeIcon size={10} />
-                  <span>{subTypeInfo.label}</span>
+                  <span className="truncate max-w-[120px]">{resource.os}</span>
                 </div>
               </div>
             </div>
@@ -602,7 +664,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLaunch, category, searchQuery }
 
             {/* Connection Quality Indicator */}
             <div className="flex items-center gap-1 text-slate-400" title="Connection Quality">
-              {signalStrength > 0 ? <Wifi size={14} className="text-emerald-500" /> : <Wifi size={14} className="text-slate-300 dark:text-slate-600" />}
+              {signalStrength > 0 ? (
+                <Wifi size={14} className="text-emerald-500" />
+              ) : (
+                <Wifi size={14} className="text-slate-300 dark:text-slate-600" />
+              )}
               <span className="text-[10px] font-mono">{resource.region.includes('US') ? '24ms' : '110ms'}</span>
             </div>
           </div>
