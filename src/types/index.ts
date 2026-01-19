@@ -3,6 +3,14 @@ export enum ResourceType {
   APPLICATION = 'APPLICATION'
 }
 
+export enum ResourceSubType {
+  DESKTOP_EXCLUSIVE = 'DESKTOP_EXCLUSIVE',
+  DESKTOP_SHARED = 'DESKTOP_SHARED',
+  DESKTOP_REVERTIBLE = 'DESKTOP_REVERTIBLE',
+  APP_EXCLUSIVE = 'APP_EXCLUSIVE',
+  APP_SHARED = 'APP_SHARED'
+}
+
 export enum SessionStatus {
   DISCONNECTED = 'DISCONNECTED',
   CONNECTING = 'CONNECTING',
@@ -19,6 +27,7 @@ export interface VDIResource {
   id: string;
   name: string;
   type: ResourceType;
+  subType: ResourceSubType;
   os: string; // e.g., 'Windows 11', 'Ubuntu', 'vApp'
   status: 'running' | 'stopped' | 'maintenance';
   region: string;

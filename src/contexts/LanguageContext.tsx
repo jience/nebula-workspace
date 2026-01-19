@@ -58,6 +58,13 @@ const translations: Record<Language, Record<string, string>> = {
     'dash.sort.status': 'Sort by Status',
     'dash.sort.usage': 'Sort by Usage',
 
+    // Resource Types
+    'subtype.desktop_exclusive': 'Exclusive',
+    'subtype.desktop_shared': 'Shared',
+    'subtype.desktop_revertible': 'Revertible',
+    'subtype.app_exclusive': 'Exclusive App',
+    'subtype.app_shared': 'Shared App',
+
     // Log
     'log.search': 'Search activity...',
     'log.clear': 'Clear History',
@@ -177,6 +184,13 @@ const translations: Record<Language, Record<string, string>> = {
     'dash.sort.status': '按状态排序',
     'dash.sort.usage': '按使用率排序',
 
+    // Resource Types
+    'subtype.desktop_exclusive': '专属桌面',
+    'subtype.desktop_shared': '共享桌面',
+    'subtype.desktop_revertible': '还原桌面',
+    'subtype.app_exclusive': '专属应用',
+    'subtype.app_shared': '共享应用',
+
     // Log
     'log.search': '搜索日志...',
     'log.clear': '清除历史',
@@ -295,6 +309,13 @@ const translations: Record<Language, Record<string, string>> = {
     'dash.sort.name': '名前順',
     'dash.sort.status': 'ステータス順',
     'dash.sort.usage': '使用率順',
+
+    // Resource Types
+    'subtype.desktop_exclusive': '専有デスクトップ',
+    'subtype.desktop_shared': '共有デスクトップ',
+    'subtype.desktop_revertible': '復元デスクトップ',
+    'subtype.app_exclusive': '専有アプリ',
+    'subtype.app_shared': '共有アプリ',
 
     // Log
     'log.search': 'ログを検索...',
